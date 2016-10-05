@@ -60,7 +60,7 @@ public class RegistrationActivity extends AppCompatActivity {
         }
 
 
-        Intent showActivity = new Intent(this, RegistrationActivity.class);
+        Intent showActivity = new Intent(this, graphActivity.class);
         startActivity(showActivity);
 
 
