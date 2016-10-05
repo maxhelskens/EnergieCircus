@@ -40,7 +40,6 @@ import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static java.lang.Math.pow;
@@ -53,8 +52,6 @@ public class graphActivity extends AppCompatActivity {
      ***********************/
 
     private static final String TAG = "MainActivity";
-
-    private static final String DEVICE_NAME = "SensorTag";
 
     /* light Service */
     private static final UUID LIGHT_SERVICE = UUID.fromString("F000AA70-0451-4000-B000-000000000000");
@@ -137,11 +134,12 @@ public class graphActivity extends AppCompatActivity {
         styleChart(chart);
 
         entries = new ArrayList<Entry>();
-        //generateRandEntries();
 
         dataSet = new LineDataSet(entries, "Lux"); // add entries to dataset
-        dataSet.setColors(new int[] { R.color.colorAccent }, this);
-        dataSet.setValueTextColor(R.color.colorAccent);
+        dataSet.setDrawValues(false);
+        dataSet.setDrawCircles(false);
+        dataSet.setFillColor(R.color.colorAccent);
+        dataSet.setFillAlpha(0);
 
         lineData = new LineData(dataSet);
         chart.setData(lineData);
@@ -565,6 +563,8 @@ public class graphActivity extends AppCompatActivity {
     private int i = 0;
     public void getLuxValue (BluetoothGattCharacteristic c) {
 
+
+        //Get Light intensity
         byte[] value = c.getValue();
 
         int mantissa;
@@ -578,9 +578,8 @@ public class graphActivity extends AppCompatActivity {
         double magnitude = pow(2.0f, exponent);
         output = (mantissa * magnitude);
 
-        Log.e("Light", output + " Lux");
-
-        dataSet.addEntry(new Entry((float) i, (float) output));
+        //Set entry
+        dataSet.addEntry(new Entry( (float) i, (float) output));
         lineData.notifyDataChanged(); // let the data know a dataSet changed
         chart.notifyDataSetChanged(); // let the chart know it's data changed
         chart.invalidate(); // refresh
@@ -605,30 +604,22 @@ public class graphActivity extends AppCompatActivity {
     public void styleChart(LineChart c) {
         //styling
         c.setNoDataText("Er is geen data beschikbaar");
+        c.setDescription("");
+
         XAxis xAxis = c.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextSize(10f);
-        xAxis.setDrawAxisLine(true);
+        xAxis.setDrawAxisLine(false);
         xAxis.setDrawGridLines(false);
+        xAxis.setDrawLabels(false);
         YAxis left = c.getAxisLeft();
         left.setDrawLabels(true); // axis labels
         left.setDrawAxisLine(true); // axis line
         left.setDrawGridLines(false); // no grid lines
         left.setDrawZeroLine(true); // draw a zero line
+
         c.getAxisRight().setEnabled(false); // no right axis
         c.animateX(3000);
     }
-
-
-    public void generateRandEntries () {
-
-        for (int i = 0; i < 200; i++) {
-            Random random = new Random();
-            float rand = random.nextFloat();
-            entries.add(new Entry((float)i, rand));
-        }
-
-    }
-
 
 }
