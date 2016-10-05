@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">EnergieCircus</string>
+    <string name="tst">groepsnaam</string>
+    <string name="Klas">Klas</string>
+    <string name="Groepsnaam">Groepsnaam</string>
+    <string name="first">first</string>
+    <string name="second">second</string>
+    <string name="third">third</string>
 </resources>

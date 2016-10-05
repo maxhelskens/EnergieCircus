@@ -8,15 +8,73 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/windowBackground"
     tools:context="com.example.max.energiecircus.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/text1"
-        android:text="Hello World!"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
+
+      <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerInParent="true">
+            <ImageButton
+                android:id="@+id/icon1"
+                android:onClick="methods1"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:paddingTop="50dp"
+                android:adjustViewBounds="true"
+                android:layout_gravity="left"
+                android:gravity="center_horizontal"
+                android:scaleType = "fitCenter"
+                android:maxWidth="400dp"
+                android:maxHeight="400dp"
+                android:background="@color/windowBackground"
+                android:src="@drawable/trophynew" />
+
+          <ImageButton
+                android:id="@+id/icon2"
+                android:onClick="classRegistration"
+                android:layout_width="0dp"
+                android:layout_weight= "1"
+                android:layout_height="wrap_content"
+                android:paddingTop="50dp"
+                android:layout_gravity="right"
+                android:gravity="center_horizontal"
+                android:adjustViewBounds="true"
+                android:maxWidth="400dp"
+                android:maxHeight="400dp"
+                android:scaleType="fitCenter"
+                android:background="@color/windowBackground"
+                android:src="@drawable/playbutton"
+                />
+
+        </LinearLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttons"
+        android:onClick="loadWebsite"
+        android:padding="5sp"
+        android:textAlignment="center"
+        android:text="Klik hier voor onze website"
+        android:textColor="@color/colorAccent"
+        android:background="@color/windowBackground"
+        android:textSize="25sp"
+        android:layout_alignParentBottom="true" />
+    <!--  <RelativeLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent">
+        <TextView
+            android:id="@+id/texthere2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="1dp" />
+    </RelativeLayout>-->
 </RelativeLayout>
