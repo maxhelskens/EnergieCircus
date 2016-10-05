@@ -34,6 +34,7 @@
             android:textColor="@color/textColorPrimary"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
+            android:onClick="goToPlayground"
             />
 
     </RelativeLayout>

@@ -622,4 +622,9 @@ public class graphActivity extends AppCompatActivity {
         c.animateX(3000);
     }
 
+    public void goToPlayground () {
+        Intent showActivity = new Intent(this, BikeActivity.class);
+        startActivity(showActivity);
+    }
+
 }
