@@ -20,15 +20,20 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -48,7 +53,7 @@ import static java.lang.Math.pow;
 public class graphActivity extends AppCompatActivity {
 
     /***********************
-     *    BLE parameters   *
+     * BLE parameters   *
      ***********************/
 
     private static final String TAG = "MainActivity";
@@ -73,7 +78,7 @@ public class graphActivity extends AppCompatActivity {
     private List<ScanFilter> filters;
 
     /**************************
-     *    Layout parameters   *
+     * Layout parameters   *
      **************************/
 
     // Use of graph: https://github.com/PhilJay/MPAndroidChart/wiki
@@ -81,12 +86,6 @@ public class graphActivity extends AppCompatActivity {
     private List<Entry> entries;
     private LineDataSet dataSet;
     private LineData lineData;
-
-
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,9 +146,8 @@ public class graphActivity extends AppCompatActivity {
     }
 
 
-
     /**********************
-     *    BLE Functions   *
+     * BLE Functions   *
      **********************/
 
     @Override
@@ -226,9 +224,9 @@ public class graphActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         //Add any device elements we've discovered to the overflow menu
-        for (int i=0; i < mDevices.size(); i++) {
+        for (int i = 0; i < mDevices.size(); i++) {
             BluetoothDevice device = mDevices.valueAt(i);
-            if (device.getName() != null){
+            if (device.getName() != null) {
                 menu.add(0, mDevices.keyAt(i), 0, device.getName());
             }
         }
@@ -349,9 +347,13 @@ public class graphActivity extends AppCompatActivity {
         /* State Machine Tracking */
         private int mState = 0;
 
-        private void reset() { mState = 0; }
+        private void reset() {
+            mState = 0;
+        }
 
-        private void advance() { mState++; }
+        private void advance() {
+            mState++;
+        }
 
         /*
          * Send an enable command to each sensor by writing a configuration
@@ -365,7 +367,7 @@ public class graphActivity extends AppCompatActivity {
                     Log.d(TAG, "Enabling light");
                     characteristic = gatt.getService(LIGHT_SERVICE)
                             .getCharacteristic(LIGHT_CONFIG_CHAR);
-                    characteristic.setValue(new byte[] {0x01});
+                    characteristic.setValue(new byte[]{0x01});
                     break;
                 default:
                     mHandler.sendEmptyMessage(MSG_DISMISS);
@@ -561,7 +563,8 @@ public class graphActivity extends AppCompatActivity {
 
 
     private int i = 0;
-    public void getLuxValue (BluetoothGattCharacteristic c) {
+
+    public void getLuxValue(BluetoothGattCharacteristic c) {
 
 
         //Get Light intensity
@@ -570,7 +573,7 @@ public class graphActivity extends AppCompatActivity {
         int mantissa;
         int exponent;
 
-        Integer sfloat= shortUnsignedAtOffset(value, 0);
+        Integer sfloat = shortUnsignedAtOffset(value, 0);
         mantissa = sfloat & 0x0FFF;
         exponent = (sfloat >> 12) & 0xFF;
 
@@ -579,7 +582,7 @@ public class graphActivity extends AppCompatActivity {
         output = (mantissa * magnitude);
 
         //Set entry
-        dataSet.addEntry(new Entry( (float) i, (float) output));
+        dataSet.addEntry(new Entry((float) i, (float) output));
         lineData.notifyDataChanged(); // let the data know a dataSet changed
         chart.notifyDataSetChanged(); // let the chart know it's data changed
         chart.invalidate(); // refresh
@@ -589,16 +592,13 @@ public class graphActivity extends AppCompatActivity {
 
     private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
         Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer upperByte = (int) c[offset+1] & 0xFF;
+        Integer upperByte = (int) c[offset + 1] & 0xFF;
         return (upperByte << 8) + lowerByte;
     }
 
 
-
-
-
     /*************************
-     *    Layout Functions   *
+     * Layout Functions   *
      *************************/
 
     public void styleChart(LineChart c) {
@@ -622,9 +622,30 @@ public class graphActivity extends AppCompatActivity {
         c.animateX(3000);
     }
 
-    public void goToPlayground () {
-        Intent showActivity = new Intent(this, BikeActivity.class);
-        startActivity(showActivity);
+    public void goToPlayground(View v) {
+      /*  Intent showActivity = new Intent(graphActivity.this, BikeActivity.class);
+        startActivity(showActivity);*/
+        showDialogue();
+    }
+
+    public void showDialogue() {
+
+        LayoutInflater li = getLayoutInflater().from(graphActivity.this);
+        View v = li.inflate(R.layout.popupscherm, null);
+        AlertDialog.Builder adb = new AlertDialog.Builder(graphActivity.this);
+        adb.setView(v);
+        // Find the toolbar view inside the activity layout
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.menu_main);
+     //   toolbar.setTitle("GA NAAR DE ENERGIEFIETSEN EN CONNECTEER");
+     /*   setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("My title");*/
+        // Sets the Toolbar to act as the ActionBar for this Activity window.
+        // Make sure the toolbar exists in the activity and is not null
+     //   setSupportActionBar(toolbar);
+        //code
+        AlertDialog alert = adb.create();
+        alert.show();
     }
 
 }
