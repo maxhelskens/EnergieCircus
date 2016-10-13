@@ -10,9 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@color/windowBackground"
     tools:context="com.example.max.energiecircus.MainActivity">
-
-
-
       <LinearLayout
             android:id="@+id/buttons"
             android:layout_width="match_parent"

@@ -20,7 +20,6 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,7 +49,7 @@ import java.util.UUID;
 import static java.lang.Math.pow;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class graphActivity extends AppCompatActivity {
+public class GraphActivity extends AppCompatActivity {
 
     /***********************
      * BLE parameters   *
@@ -76,6 +75,7 @@ public class graphActivity extends AppCompatActivity {
     private BluetoothLeScanner mLEScanner;
     private ScanSettings settings;
     private List<ScanFilter> filters;
+    private Toolbar toolbar;
 
     /**************************
      * Layout parameters   *
@@ -623,23 +623,29 @@ public class graphActivity extends AppCompatActivity {
     }
 
     public void goToPlayground(View v) {
-      /*  Intent showActivity = new Intent(graphActivity.this, BikeActivity.class);
+      /*  Intent showActivity = new Intent(GraphActivity.this, BikeActivity.class);
         startActivity(showActivity);*/
         showDialogue();
     }
 
     public void showDialogue() {
 
-        LayoutInflater li = getLayoutInflater().from(graphActivity.this);
+        LayoutInflater li = getLayoutInflater().from(GraphActivity.this);
         View v = li.inflate(R.layout.popupscherm, null);
-        AlertDialog.Builder adb = new AlertDialog.Builder(graphActivity.this);
+        AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
         adb.setView(v);
         // Find the toolbar view inside the activity layout
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.inflateMenu(R.menu.menu_main);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+       /* if(toolbar == null){
+
+            Log.e("toolbar niet gevonden", null);
+        }else{
+            Log.e("toolbar gevonden",null);
+        }*/
+     //   toolbar.inflateMenu(R.menu.menu_main);
      //   toolbar.setTitle("GA NAAR DE ENERGIEFIETSEN EN CONNECTEER");
-     /*   setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("My title");*/
+        //setSupportActionBar(toolbar);
+       //* getSupportActionBar().setTitle("My title");*//*
         // Sets the Toolbar to act as the ActionBar for this Activity window.
         // Make sure the toolbar exists in the activity and is not null
      //   setSupportActionBar(toolbar);
@@ -647,5 +653,9 @@ public class graphActivity extends AppCompatActivity {
         AlertDialog alert = adb.create();
         alert.show();
     }
+
+   /* public void showDialogue() {
+
+    }*/
 
 }

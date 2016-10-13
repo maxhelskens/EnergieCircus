@@ -59,7 +59,7 @@ public class RegistrationActivity extends AppCompatActivity {
             Log.e("klas",klasRegistratie);
         }
 
-        Intent showActivity = new Intent(this, graphActivity.class);
+        Intent showActivity = new Intent(this, GraphActivity.class);
         startActivity(showActivity);
 
     }
