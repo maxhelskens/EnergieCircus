@@ -63,15 +63,5 @@
         android:background="@color/windowBackground"
         android:textSize="25sp"
         android:layout_alignParentBottom="true" />
-    <!--  <RelativeLayout
-        android:id="@+id/footer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorAccent">
-        <TextView
-            android:id="@+id/texthere2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="1dp" />
-    </RelativeLayout>-->
+
 </RelativeLayout>
