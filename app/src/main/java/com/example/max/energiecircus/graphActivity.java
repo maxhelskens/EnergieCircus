@@ -104,8 +104,8 @@ public class GraphActivity extends AppCompatActivity {
     private int totalTurns = 0;
     private int finished = 0;
     private int prevFinished = 0;
-    private Stopwatch timer = new Stopwatch();
-    private Stopwatch turnTimer = new Stopwatch();
+    private Stopwatch timerLux = new Stopwatch();
+   // private Stopwatch turnTimer = new Stopwatch();
     private double outputLux;
     private double amountEnergy;
     private double powerTotal = 0;
@@ -588,12 +588,15 @@ public class GraphActivity extends AppCompatActivity {
             BluetoothGattCharacteristic characteristic;
             switch (msg.what) {
                 case MSG_LUX:
+                    timerLux.start();
                     characteristic = (BluetoothGattCharacteristic) msg.obj;
                     if (characteristic.getValue() == null) {
                         Log.w(TAG, "Error obtaining magneto value");
                         return;
                     }
                     getLuxValue(characteristic);
+                    timerLux.getElapsedTime();
+                    Log.e("Timer Lux: ", String.valueOf(timerLux.getElapsedTime()));
                     break;
                 case MSG_MAGNETO:
                     characteristic = (BluetoothGattCharacteristic) msg.obj;
@@ -627,7 +630,7 @@ public class GraphActivity extends AppCompatActivity {
     }
 
     public void getLuxValue(BluetoothGattCharacteristic c) {
-
+       // timerLux.start();
         //Initialize amount of starting energy in watts. (500000 = 500kW)
         amountEnergy = 500000f;
         //Previous power
@@ -640,10 +643,10 @@ public class GraphActivity extends AppCompatActivity {
         //data from sensor
         Integer sfloat = shortUnsignedAtOffset(value, 0);
         mantissa = sfloat & 0x0FFF;
-        exponent = (sfloat >> 12) & 0xFF;
+        exponent = (sfloat & 0xF000) >> 12;
         double magnitude = pow(2.0f, exponent);
         //New output lux value
-        outputLux = (mantissa * magnitude);
+        outputLux = mantissa * (0.01*magnitude);
         //Current power consumption
         double power = calculateWattFromLux(outputLux);
         //Getting total power, summing previous and current power constantly.
@@ -656,7 +659,6 @@ public class GraphActivity extends AppCompatActivity {
         Log.e("Power: ", String.valueOf(power));
         /*Set entry and intialize graph*/
         //Instant power consumption
-        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W");
         dataSet.setFillColor(R.color.colorAccent);
         //Adding entry: using total power consumption.
         energyLeft = amountEnergy - powerTotal;
@@ -665,6 +667,10 @@ public class GraphActivity extends AppCompatActivity {
         chart.notifyDataSetChanged(); // let the chart know its data changed
         chart.invalidate(); // refresh
         i++;
+       // long timePassed = timerLux.getElapsedTime();
+        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
+
+
     }
 
     public double calculateWattFromLux(double outputValueOfLux){

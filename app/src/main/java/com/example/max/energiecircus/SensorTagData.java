@@ -9,6 +9,8 @@ import android.os.Build;
  */
 public class SensorTagData {
 
+
+
     public static double extractMagnetoData(BluetoothGattCharacteristic c) {
 
         /*MAGNETO*/
@@ -29,6 +31,7 @@ public class SensorTagData {
 
         return 1.0 * y;
     }
+
 
 
     /*HUMIDITY*/
