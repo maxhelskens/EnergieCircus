@@ -94,6 +94,10 @@ public class GraphActivity extends AppCompatActivity {
     private LineChart chart;
     private List<Entry> entries;
     private LineDataSet dataSet;
+
+    private List<Entry> startEntries;
+    private LineDataSet startDataSet;
+
     private LineData lineData;
     private TextView textMagneto;
 
@@ -159,7 +163,15 @@ public class GraphActivity extends AppCompatActivity {
         dataSet.setFillColor(R.color.colorAccent);
         dataSet.setFillAlpha(0);
 
-        lineData = new LineData(dataSet);
+        startEntries = new ArrayList<Entry>();
+
+        startDataSet = new LineDataSet(startEntries, "Lux"); // add entries to dataset
+        startDataSet.setDrawValues(false);
+        startDataSet.setDrawCircles(false);
+        startDataSet.setFillColor(R.color.colorPrimaryLight);
+        startDataSet.setFillAlpha(0);
+
+        lineData = new LineData(dataSet, startDataSet);
         chart.setData(lineData);
         chart.invalidate(); // refresh
 
@@ -660,9 +672,11 @@ public class GraphActivity extends AppCompatActivity {
         /*Set entry and intialize graph*/
         //Instant power consumption
         dataSet.setFillColor(R.color.colorAccent);
+        startDataSet.setFillColor(R.color.colorPrimaryLight);
         //Adding entry: using total power consumption.
-        energyLeft = amountEnergy - powerTotal;
+        energyLeft = amountEnergy - (powerTotal * 0.000222);
         dataSet.addEntry(new Entry((float) i, (float) energyLeft));
+        startDataSet.addEntry(new Entry((float) i, (float) amountEnergy));
         lineData.notifyDataChanged(); // let the data know a dataSet changed
         chart.notifyDataSetChanged(); // let the chart know its data changed
         chart.invalidate(); // refresh
@@ -793,7 +807,7 @@ public class GraphActivity extends AppCompatActivity {
         YAxis yAxis = c.getAxisLeft();
         yAxis.setDrawLabels(true); // axis labels
         yAxis.setDrawAxisLine(true); // axis line
-        yAxis.setDrawGridLines(true); // no grid lines
+        yAxis.setDrawGridLines(false); // no grid lines
         yAxis.setDrawZeroLine(true); // draw a zero line
 
 
