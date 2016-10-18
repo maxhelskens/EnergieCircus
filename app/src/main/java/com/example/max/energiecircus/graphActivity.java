@@ -19,7 +19,9 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,8 +30,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.TextView;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,12 +59,19 @@ public class GraphActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    /* light Service */
+
+
+    /* Light Service */
     private static final UUID LIGHT_SERVICE = UUID.fromString("F000AA70-0451-4000-B000-000000000000");
     private static final UUID LIGHT_DATA_CHAR = UUID.fromString("f000aa71-0451-4000-b000-000000000000");
     private static final UUID LIGHT_CONFIG_CHAR = UUID.fromString("f000aa72-0451-4000-b000-000000000000");
+    /* Magneto Service */
+    private static final UUID MAGNETO_SERVICE = UUID.fromString("F000AA80-0451-4000-B000-000000000000");
+    private static final UUID MAGNETO_DATA_CHAR = UUID.fromString("f000aa81-0451-4000-b000-000000000000");
+    private static final UUID MAGNETO_CONFIG_CHAR = UUID.fromString("f000aa82-0451-4000-b000-000000000000");
     /* Client Configuration Descriptor */
     private static final UUID CONFIG_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
 
     private BluetoothAdapter mBluetoothAdapter;
     private SparseArray<BluetoothDevice> mDevices;
@@ -86,6 +95,22 @@ public class GraphActivity extends AppCompatActivity {
     private List<Entry> entries;
     private LineDataSet dataSet;
     private LineData lineData;
+    private TextView textMagneto;
+
+    /*Lux*/
+    private int i = 0;
+
+    /*Needed for magneto*/
+    private int totalTurns = 0;
+    private int finished = 0;
+    private int prevFinished = 0;
+    private Stopwatch timer = new Stopwatch();
+    private Stopwatch turnTimer = new Stopwatch();
+    private double outputLux;
+    private double amountEnergy;
+    private double powerTotal = 0;
+    private double energyLeft;
+    private double averagePowerUsage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +122,6 @@ public class GraphActivity extends AppCompatActivity {
          ************/
 
         setProgressBarIndeterminate(true);
-
-        // Find the toolbar view inside the activity layout
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        // Sets the Toolbar to act as the ActionBar for this Activity window.
-        // Make sure the toolbar exists in the activity and is not null
-        //setSupportActionBar(toolbar);
 
         //Check if BLE is supported
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -143,6 +162,10 @@ public class GraphActivity extends AppCompatActivity {
         lineData = new LineData(dataSet);
         chart.setData(lineData);
         chart.invalidate(); // refresh
+
+        //textMagneto
+        textMagneto = (TextView) findViewById(R.id.magnetoValue);
+
     }
 
 
@@ -337,6 +360,9 @@ public class GraphActivity extends AppCompatActivity {
         }
     }
 
+    private void clearDisplayValues(){
+        textMagneto.setText("---");
+    }
 
     /*
      * In this callback, we've created a bit of a state machine to enforce that only
@@ -369,6 +395,12 @@ public class GraphActivity extends AppCompatActivity {
                             .getCharacteristic(LIGHT_CONFIG_CHAR);
                     characteristic.setValue(new byte[]{0x01});
                     break;
+                case 1:
+                    Log.d(TAG, "Enabling magneto");
+                    characteristic = gatt.getService(MAGNETO_SERVICE)
+                            .getCharacteristic(MAGNETO_CONFIG_CHAR);
+                    characteristic.setValue(new byte[] {(byte)0x7F, (byte)0x00});
+                    break;
                 default:
                     mHandler.sendEmptyMessage(MSG_DISMISS);
                     Log.i(TAG, "All Sensors Enabled");
@@ -385,9 +417,14 @@ public class GraphActivity extends AppCompatActivity {
             BluetoothGattCharacteristic characteristic;
             switch (mState) {
                 case 0:
-                    Log.d(TAG, "Reading magneto");
+                    Log.d(TAG, "Reading light");
                     characteristic = gatt.getService(LIGHT_SERVICE)
                             .getCharacteristic(LIGHT_DATA_CHAR);
+                    break;
+                case 1:
+                    Log.d(TAG, "Reading Magneto");
+                    characteristic = gatt.getService(MAGNETO_SERVICE)
+                            .getCharacteristic(MAGNETO_DATA_CHAR);
                     break;
                 default:
                     mHandler.sendEmptyMessage(MSG_DISMISS);
@@ -408,9 +445,14 @@ public class GraphActivity extends AppCompatActivity {
             BluetoothGattCharacteristic characteristic;
             switch (mState) {
                 case 0:
-                    Log.d(TAG, "Set notify magneto");
+                    Log.d(TAG, "Set notify light");
                     characteristic = gatt.getService(LIGHT_SERVICE)
                             .getCharacteristic(LIGHT_DATA_CHAR);
+                    break;
+                case 1:
+                    Log.d(TAG, "Set notify magneto");
+                    characteristic = gatt.getService(MAGNETO_SERVICE)
+                            .getCharacteristic(MAGNETO_DATA_CHAR);
                     break;
                 default:
                     mHandler.sendEmptyMessage(MSG_DISMISS);
@@ -429,7 +471,7 @@ public class GraphActivity extends AppCompatActivity {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.i("onConnectionStateChange", "Status: " + status);
+            Log.d(TAG, "Connection State Change: "+status+" -> "+connectionState(newState));
             if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
                 /*
                  * Once successfully connected, we must next discover all the services on the
@@ -471,6 +513,9 @@ public class GraphActivity extends AppCompatActivity {
             Log.i("onCharacteristicRead", characteristic.toString());
             //For each read, pass the data up to the UI thread to update the display
             if (LIGHT_DATA_CHAR.equals(characteristic.getUuid())) {
+                mHandler.sendMessage(Message.obtain(null, MSG_LUX, characteristic));
+            }
+            if(MAGNETO_DATA_CHAR.equals(characteristic.getUuid())) {
                 mHandler.sendMessage(Message.obtain(null, MSG_MAGNETO, characteristic));
             }
 
@@ -492,6 +537,9 @@ public class GraphActivity extends AppCompatActivity {
              * UI thread to update the display.
              */
             if (LIGHT_DATA_CHAR.equals(characteristic.getUuid())) {
+                mHandler.sendMessage(Message.obtain(null, MSG_LUX, characteristic));
+            }
+            if(MAGNETO_DATA_CHAR.equals(characteristic.getUuid())){
                 mHandler.sendMessage(Message.obtain(null, MSG_MAGNETO, characteristic));
             }
         }
@@ -527,8 +575,10 @@ public class GraphActivity extends AppCompatActivity {
 
     /*
      * We have a Handler to process event results on the main thread
+     * MSG have random int values
      */
-    private static final int MSG_MAGNETO = 104;
+    private static final int MSG_MAGNETO = 102;
+    private static final int MSG_LUX = 104;
     private static final int MSG_PROGRESS = 201;
     private static final int MSG_DISMISS = 202;
     private static final int MSG_CLEAR = 301;
@@ -537,14 +587,21 @@ public class GraphActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             BluetoothGattCharacteristic characteristic;
             switch (msg.what) {
-
-                case MSG_MAGNETO:
+                case MSG_LUX:
                     characteristic = (BluetoothGattCharacteristic) msg.obj;
                     if (characteristic.getValue() == null) {
                         Log.w(TAG, "Error obtaining magneto value");
                         return;
                     }
                     getLuxValue(characteristic);
+                    break;
+                case MSG_MAGNETO:
+                    characteristic = (BluetoothGattCharacteristic) msg.obj;
+                    if (characteristic.getValue() == null) {
+                        Log.w(TAG, "Error obtaining magneto value");
+                        return;
+                    }
+                    updateMagnetoValues(characteristic);
                     break;
                 case MSG_PROGRESS:
                     mProgress.setMessage((String) msg.obj);
@@ -556,38 +613,153 @@ public class GraphActivity extends AppCompatActivity {
                     mProgress.hide();
                     break;
                 case MSG_CLEAR:
+                    clearDisplayValues();
                     break;
             }
         }
     };
 
-
-    private int i = 0;
+    private void updateMagnetoValues(BluetoothGattCharacteristic characteristic){
+        double magneto = SensorTagData.extractMagnetoData(characteristic);
+        magneto=Math.abs(magneto);
+       // textMagneto.setText(String.format("Magneet waarde:", magneto));
+        Log.e("test","getMagnetoValueMethod");
+    }
 
     public void getLuxValue(BluetoothGattCharacteristic c) {
 
-
+        //Initialize amount of starting energy in watts. (500000 = 500kW)
+        amountEnergy = 500000f;
+        //Previous power
+        double previousPower = calculateWattFromLux(outputLux);
         //Get Light intensity
+        Log.e("test","GetLuxVALUEMETHOD");
         byte[] value = c.getValue();
-
         int mantissa;
         int exponent;
-
+        //data from sensor
         Integer sfloat = shortUnsignedAtOffset(value, 0);
         mantissa = sfloat & 0x0FFF;
         exponent = (sfloat >> 12) & 0xFF;
-
-        double output;
         double magnitude = pow(2.0f, exponent);
-        output = (mantissa * magnitude);
+        //New output lux value
+        outputLux = (mantissa * magnitude);
+        //Current power consumption
+        double power = calculateWattFromLux(outputLux);
+        //Getting total power, summing previous and current power constantly.
+        powerTotal += power;
 
-        //Set entry
-        dataSet.addEntry(new Entry((float) i, (float) output));
+        if((double) i !=0.0){
+            averagePowerUsage = powerTotal/((double) i);
+        }
+
+        Log.e("Power: ", String.valueOf(power));
+        /*Set entry and intialize graph*/
+        //Instant power consumption
+        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W");
+        dataSet.setFillColor(R.color.colorAccent);
+        //Adding entry: using total power consumption.
+        energyLeft = amountEnergy - powerTotal;
+        dataSet.addEntry(new Entry((float) i, (float) energyLeft));
         lineData.notifyDataChanged(); // let the data know a dataSet changed
-        chart.notifyDataSetChanged(); // let the chart know it's data changed
+        chart.notifyDataSetChanged(); // let the chart know its data changed
         chart.invalidate(); // refresh
-
         i++;
+    }
+
+    public double calculateWattFromLux(double outputValueOfLux){
+         /*Get Watt from lux
+        Fluorescent lamp: 60lm/W
+        Formula P(W) = Ev(lx) × A(m2) / η(lm/W)*/
+        SharedPreferences prefs = getSharedPreferences("RegistrationActivity",0);
+        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
+        /*60 omdat een gemiddelde TL-Lamp 60 efficientie heeft.
+        Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm*/
+        double power = (outputValueOfLux*(double)klasOppervlakteRegistratie)/60.0;
+        return power;
+    }
+
+
+    /**Magneto data**/
+
+   /* ArrayList<Double> magnets = new ArrayList<>();
+    double average = 0;
+    int wait5 = 0;
+    long prevTurnTimer = 0;*/
+    private void updateValues(BluetoothGattCharacteristic characteristic) {
+
+       /* if (totalTurns < 471) {
+            //if (totalTurns < 5) { // to Test
+            double magnet = SensorTagData.extractMagnetoX(characteristic);
+            magnet = Math.abs(magnet);
+
+            if (wait5 == 0) {
+
+                if (magnet > average + 300 ||  magnet < average - 300) {
+                    if(totalTurns == 1){
+                        timer.start();
+                        turnTimer.start();
+                    }
+
+                    Boolean skippedTurn = false;
+                    turnTimer.stop();
+                    if(turnTimer.getElapsedTime() < 3 * prevTurnTimer && turnTimer.getElapsedTime() > 1.5 * prevTurnTimer){
+                        skippedTurn = true;
+                    }
+                    else {
+                        prevTurnTimer = turnTimer.getElapsedTime();
+                    }
+                    turnTimer.start();
+
+                    if(skippedTurn) {
+                        totalTurns ++;
+                    }
+
+                    wait5 = 6;
+
+                    totalTurns ++;
+
+                    ViewGroup.MarginLayoutParams lpimg = (ViewGroup.MarginLayoutParams) img.getLayoutParams();
+                    lpimg.leftMargin = (int) (Math.round(totalTurns * 1.7) -100);
+                    img.setLayoutParams(lpimg);
+
+                    //mTurns.setText("" + totalTurns);
+                    mDist.setText((int)(totalTurns * 2.125) + " m");
+
+                }
+            }
+            else {
+                wait5 --;
+            }
+
+            if (magnets.size() >= 5) {
+                magnets.remove(0);
+            }
+            magnets.add(magnet);
+            double sum = 0;
+            for (int i = 0; i < magnets.size(); i++) {
+                sum += magnets.get(i);
+            }
+            average = sum/magnets.size();
+
+            //TODO: reset value
+            if(totalTurns % 94 == 0) {
+                //if(totalTurns % 3 == 0) { //To test
+                addStar(totalTurns/94);
+                //addStar(totalTurns/3); //To test
+            }
+        }
+        else {
+            //finished
+            finished = 1;
+            if (finished == 1 && prevFinished == 0) {
+                prevFinished = 1;
+
+                timer.stop();
+
+                showDialog();
+            }
+        }*/
     }
 
     private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
@@ -612,50 +784,42 @@ public class GraphActivity extends AppCompatActivity {
         xAxis.setDrawAxisLine(false);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawLabels(false);
-        YAxis left = c.getAxisLeft();
-        left.setDrawLabels(true); // axis labels
-        left.setDrawAxisLine(true); // axis line
-        left.setDrawGridLines(false); // no grid lines
-        left.setDrawZeroLine(true); // draw a zero line
+        YAxis yAxis = c.getAxisLeft();
+        yAxis.setDrawLabels(true); // axis labels
+        yAxis.setDrawAxisLine(true); // axis line
+        yAxis.setDrawGridLines(true); // no grid lines
+        yAxis.setDrawZeroLine(true); // draw a zero line
+
 
         c.getAxisRight().setEnabled(false); // no right axis
         c.animateX(3000);
     }
 
     public void goToPlayground(View v) {
-      /*  Intent showActivity = new Intent(GraphActivity.this, BikeActivity.class);
-        startActivity(showActivity);*/
+        //disconnect current tag connection
+        onStop();
+        //Shows toolbar with bluetooth icon
         showDialogue();
     }
 
     public void showDialogue() {
-
-        LayoutInflater li = getLayoutInflater().from(GraphActivity.this);
-        View v = li.inflate(R.layout.popupscherm, null);
+        /*Nog bluetooth icoontje toevoegen*/
+        //Set popupscherm as view
+        View v = getLayoutInflater().inflate(R.layout.popupscherm,null);
         AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
         adb.setView(v);
-        // Find the toolbar view inside the activity layout
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-       /* if(toolbar == null){
+        //Find the toolbar view inside the activity layout
 
-            Log.e("toolbar niet gevonden", null);
-        }else{
-            Log.e("toolbar gevonden",null);
-        }*/
-     //   toolbar.inflateMenu(R.menu.menu_main);
-     //   toolbar.setTitle("GA NAAR DE ENERGIEFIETSEN EN CONNECTEER");
-        //setSupportActionBar(toolbar);
-       //* getSupportActionBar().setTitle("My title");*//*
-        // Sets the Toolbar to act as the ActionBar for this Activity window.
-        // Make sure the toolbar exists in the activity and is not null
-     //   setSupportActionBar(toolbar);
-        //code
+        /*because view v has the popupscherm.xml view, you have to put "v.method();"
+        otherwise with this findViewById(R.id.toolbar);
+        you are trying to find the toolbar in the current set layout of activity
+        which is different from popupscherm.xml*/
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        toolbar.setTitle("Ga naar de SMERGY fietsen");
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.inflateMenu(R.menu.menu_main);
         AlertDialog alert = adb.create();
         alert.show();
     }
-
-   /* public void showDialogue() {
-
-    }*/
-
 }
+
