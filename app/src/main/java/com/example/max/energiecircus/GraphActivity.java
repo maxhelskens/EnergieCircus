@@ -34,6 +34,8 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,6 +118,10 @@ public class GraphActivity extends AppCompatActivity {
     private double energyLeft;
     private double averagePowerUsage;
 
+    private EditText inputValue;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,6 +183,8 @@ public class GraphActivity extends AppCompatActivity {
 
         //textMagneto
         textMagneto = (TextView) findViewById(R.id.magnetoValue);
+
+
 
     }
 
@@ -819,7 +827,53 @@ public class GraphActivity extends AppCompatActivity {
         //disconnect current tag connection
         onStop();
         //Shows toolbar with bluetooth icon
-        showDialogue();
+        //showDialogue();
+        showDistanceInput();
+    }
+
+    public void showDistanceInput(){
+        View v = getLayoutInflater().inflate(R.layout.input_popup, null);
+        AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
+        adb.setView(v);
+
+        inputValue = (EditText) v.findViewById(R.id.editText);
+
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        toolbar.setTitle("Hoeveel energie in kWh hebben jullie opgewekt?");
+        toolbar.setTitleTextColor(Color.WHITE);
+        AlertDialog alert = adb.create();
+        alert.show();
+    }
+
+    //TODO add functionality here to insert the distance cycled during break into the graph
+    public void distanceInputToGraph(View v){
+        double distance = 0.0;
+        try {
+            String text = inputValue.getText().toString();
+            if (!text.equals("")) {
+                distance = Double.parseDouble(text);
+                Toast.makeText(getApplicationContext(), "" + distance, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
+
+        powerTotal -= distance;
+
+        dataSet.setFillColor(R.color.colorAccent);
+        startDataSet.setFillColor(R.color.colorPrimaryLight);
+        //Adding entry: using total power consumption.
+        energyLeft = amountEnergy - powerTotal;
+        dataSet.addEntry(new Entry((float) i, (float) energyLeft));
+        startDataSet.addEntry(new Entry((float) i, (float) amountEnergy));
+        lineData.notifyDataChanged(); // let the data know a dataSet changed
+        chart.notifyDataSetChanged(); // let the chart know its data changed
+        chart.invalidate(); // refresh
+        i++;
+
     }
 
     public void showDialogue() {
