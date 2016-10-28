@@ -845,7 +845,7 @@ public class GraphActivity extends AppCompatActivity {
         alert.show();
     }
 
-    //TODO add functionality here to insert the distance cycled during break into the graph
+
     public void distanceInputToGraph(View v){
         double distance = 0.0;
         try {
