@@ -846,13 +846,13 @@ public class GraphActivity extends AppCompatActivity {
     }
 
 
-    public void distanceInputToGraph(View v){
-        double distance = 0.0;
+    public void powerInputToGraph(View v){
+        double inputPower = 0.0;
         try {
             String text = inputValue.getText().toString();
             if (!text.equals("")) {
-                distance = Double.parseDouble(text);
-                Toast.makeText(getApplicationContext(), "" + distance, Toast.LENGTH_LONG).show();
+                inputPower = Double.parseDouble(text);
+                Toast.makeText(getApplicationContext(), "" + inputPower, Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
             }
@@ -861,7 +861,7 @@ public class GraphActivity extends AppCompatActivity {
         }
 
 
-        powerTotal -= distance;
+        powerTotal -= inputPower;
 
         dataSet.setFillColor(R.color.colorAccent);
         startDataSet.setFillColor(R.color.colorPrimaryLight);
