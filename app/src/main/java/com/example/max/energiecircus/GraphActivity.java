@@ -92,7 +92,7 @@ public class GraphActivity extends AppCompatActivity {
      * Layout parameters   *
      **************************/
 
-    // Use of graph: https://github.com/PhilJay/MPAndroidChart/wiki
+    /*Use of graph: https://github.com/PhilJay/MPAndroidChart/wiki*/
     private LineChart chart;
     private List<Entry> entries;
     private LineDataSet dataSet;
@@ -111,7 +111,6 @@ public class GraphActivity extends AppCompatActivity {
     private int finished = 0;
     private int prevFinished = 0;
     private Stopwatch timerLux = new Stopwatch();
-   // private Stopwatch turnTimer = new Stopwatch();
     private double outputLux;
     private double amountEnergy;
     private double powerTotal = 0;
@@ -133,7 +132,7 @@ public class GraphActivity extends AppCompatActivity {
 
         setProgressBarIndeterminate(true);
 
-        //Check if BLE is supported
+        /*Check if BLE is supported*/
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, "BLE Not Supported",
                     Toast.LENGTH_SHORT).show();
@@ -161,8 +160,14 @@ public class GraphActivity extends AppCompatActivity {
         chart = (LineChart) findViewById(R.id.chart);
         styleChart(chart);
 
+        /**
+         * Creating Arraylist to store the different entries. Entries can include "Lux" values and the total amount of energy.
+         */
         entries = new ArrayList<Entry>();
 
+        /**
+         * Creating the entries for the Lux values. Every entry will be added to the dataset and operations will be performed.
+         */
         dataSet = new LineDataSet(entries, "Lux"); // add entries to dataset
         dataSet.setDrawValues(false);
         dataSet.setDrawCircles(false);
@@ -171,6 +176,9 @@ public class GraphActivity extends AppCompatActivity {
 
         startEntries = new ArrayList<Entry>();
 
+        /**
+         * startDataSet is the starting amount of Energy, used to measure against.
+         */
         startDataSet = new LineDataSet(startEntries, "Lux"); // add entries to dataset
         startDataSet.setDrawValues(false);
         startDataSet.setDrawCircles(false);
@@ -180,8 +188,6 @@ public class GraphActivity extends AppCompatActivity {
         lineData = new LineData(dataSet, startDataSet);
         chart.setData(lineData);
         chart.invalidate(); // refresh
-
-        //textMagneto
         textMagneto = (TextView) findViewById(R.id.magnetoValue);
 
 
@@ -214,9 +220,9 @@ public class GraphActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        //Make sure dialog is hidden
+        /*Make sure dialog is hidden*/
         mProgress.dismiss();
-        //Cancel any scans in progress
+        /*Cancel any scans in progress*/
         mHandler.removeCallbacks(mStopRunnable);
         mHandler.removeCallbacks(mStartRunnable);
 
@@ -231,7 +237,7 @@ public class GraphActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        //Disconnect from any active tag connection
+        /*Disconnect from any active tag connection*/
         if (mGatt != null) {
             mGatt.close();
             mGatt = null;
@@ -252,7 +258,7 @@ public class GraphActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Bluetooth not enabled.
+                /*Bluetooth not enabled.*/
                 finish();
                 return;
             }
@@ -260,13 +266,13 @@ public class GraphActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    // Menu icons are inflated just as they were with actionbar
+    /*Menu icons are inflated just as they were with actionbar*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        /*Inflate the menu; this adds items to the action bar if it is present.*/
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        //Add any device elements we've discovered to the overflow menu
+        /*Add any device elements we've discovered to the overflow menu*/
         for (int i = 0; i < mDevices.size(); i++) {
             BluetoothDevice device = mDevices.valueAt(i);
             if (device.getName() != null) {
@@ -283,11 +289,11 @@ public class GraphActivity extends AppCompatActivity {
             case R.id.bluetoothSearch:
                 mDevices.clear();
                 startScan();
-                //scanLeDevice(true);
+                /*scanLeDevice(true);*/
 
                 return true;
             default:
-                //Obtain the discovered device to connect with
+                /*Obtain the discovered device to connect with*/
                 BluetoothDevice device = mDevices.get(item.getItemId());
                 Log.i(TAG, "Connecting to " + device.getName());
                 /*
@@ -295,7 +301,7 @@ public class GraphActivity extends AppCompatActivity {
                  */
 
                 connectToDevice(device);
-                //Display progress UI
+                /*Display progress UI*/
                 mHandler.sendMessage(Message.obtain(null, MSG_PROGRESS, "Connecting to " + device.getName() + "..."));
                 return super.onOptionsItemSelected(item);
         }
@@ -342,7 +348,7 @@ public class GraphActivity extends AppCompatActivity {
                     Log.i("onLeScan", device.toString());
 
                     mDevices.put(device.hashCode(), device);
-                    //Update the overflow menu
+                    /*Update the overflow menu*/
                     invalidateOptionsMenu();
                 }
             };
@@ -355,7 +361,7 @@ public class GraphActivity extends AppCompatActivity {
             BluetoothDevice btDevice = result.getDevice();
 
             mDevices.put(btDevice.hashCode(), btDevice);
-            //Update the overflow menu
+            /*Update the overflow menu*/
             invalidateOptionsMenu();
         }
 
@@ -480,9 +486,9 @@ public class GraphActivity extends AppCompatActivity {
                     return;
             }
 
-            //Enable local notifications
+            /*Enable local notifications*/
             gatt.setCharacteristicNotification(characteristic, true);
-            //Enabled remote notifications
+            /*Enabled remote notifications*/
             BluetoothGattDescriptor desc = characteristic.getDescriptor(CONFIG_DESCRIPTOR);
             desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             gatt.writeDescriptor(desc);
@@ -531,16 +537,13 @@ public class GraphActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.i("onCharacteristicRead", characteristic.toString());
-            //For each read, pass the data up to the UI thread to update the display
+            /*For each read, pass the data up to the UI thread to update the display*/
             if (LIGHT_DATA_CHAR.equals(characteristic.getUuid())) {
                 mHandler.sendMessage(Message.obtain(null, MSG_LUX, characteristic));
             }
-            if(MAGNETO_DATA_CHAR.equals(characteristic.getUuid())) {
-                mHandler.sendMessage(Message.obtain(null, MSG_MAGNETO, characteristic));
-            }
-
-            //After reading the initial value, next we enable notifications
+            /*After reading the initial value, next we enable notifications*/
             setNotifyNextSensor(gatt);
+
         }
 
         @Override
@@ -558,9 +561,6 @@ public class GraphActivity extends AppCompatActivity {
              */
             if (LIGHT_DATA_CHAR.equals(characteristic.getUuid())) {
                 mHandler.sendMessage(Message.obtain(null, MSG_LUX, characteristic));
-            }
-            if(MAGNETO_DATA_CHAR.equals(characteristic.getUuid())){
-                mHandler.sendMessage(Message.obtain(null, MSG_MAGNETO, characteristic));
             }
         }
 
@@ -596,8 +596,8 @@ public class GraphActivity extends AppCompatActivity {
     /*
      * We have a Handler to process event results on the main thread
      * MSG have random int values
-     */
-    private static final int MSG_MAGNETO = 102;
+     *//*
+    private static final int MSG_MAGNETO = 102;*/
     private static final int MSG_LUX = 104;
     private static final int MSG_PROGRESS = 201;
     private static final int MSG_DISMISS = 202;
@@ -618,14 +618,6 @@ public class GraphActivity extends AppCompatActivity {
                     timerLux.getElapsedTime();
                     Log.e("Timer Lux: ", String.valueOf(timerLux.getElapsedTime()));
                     break;
-                case MSG_MAGNETO:
-                    characteristic = (BluetoothGattCharacteristic) msg.obj;
-                    if (characteristic.getValue() == null) {
-                        Log.w(TAG, "Error obtaining magneto value");
-                        return;
-                    }
-                    updateMagnetoValues(characteristic);
-                    break;
                 case MSG_PROGRESS:
                     mProgress.setMessage((String) msg.obj);
                     if (!mProgress.isShowing()) {
@@ -642,167 +634,13 @@ public class GraphActivity extends AppCompatActivity {
         }
     };
 
-    private void updateMagnetoValues(BluetoothGattCharacteristic characteristic){
-        double magneto = SensorTagData.extractMagnetoData(characteristic);
-        magneto=Math.abs(magneto);
-       // textMagneto.setText(String.format("Magneet waarde:", magneto));
-        Log.e("test","getMagnetoValueMethod");
-    }
-
-    public void getLuxValue(BluetoothGattCharacteristic c) {
-       // timerLux.start();
-        //Initialize amount of starting energy in watts. (500000 = 500kW)
-        amountEnergy = 500000f;
-        //Previous power
-        double previousPower = calculateWattFromLux(outputLux);
-        //Get Light intensity
-        Log.e("test","GetLuxVALUEMETHOD");
-        byte[] value = c.getValue();
-        int mantissa;
-        int exponent;
-        //data from sensor
-        Integer sfloat = shortUnsignedAtOffset(value, 0);
-        mantissa = sfloat & 0x0FFF;
-        exponent = (sfloat & 0xF000) >> 12;
-        double magnitude = pow(2.0f, exponent);
-        //New output lux value
-        outputLux = mantissa * (0.01*magnitude);
-        //Current power consumption
-        double power = calculateWattFromLux(outputLux);
-        //Getting total power, summing previous and current power constantly.
-        powerTotal += power;
-
-        if((double) i !=0.0){
-            averagePowerUsage = powerTotal/((double) i);
-        }
-
-        Log.e("Power: ", String.valueOf(power));
-        /*Set entry and intialize graph*/
-        //Instant power consumption
-        dataSet.setFillColor(R.color.colorAccent);
-        startDataSet.setFillColor(R.color.colorPrimaryLight);
-        //Adding entry: using total power consumption.
-        energyLeft = amountEnergy - (powerTotal * 0.000222);
-        dataSet.addEntry(new Entry((float) i, (float) energyLeft));
-        startDataSet.addEntry(new Entry((float) i, (float) amountEnergy));
-        lineData.notifyDataChanged(); // let the data know a dataSet changed
-        chart.notifyDataSetChanged(); // let the chart know its data changed
-        chart.invalidate(); // refresh
-        i++;
-       // long timePassed = timerLux.getElapsedTime();
-        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
-
-
-    }
-
-    public double calculateWattFromLux(double outputValueOfLux){
-         /*Get Watt from lux
-        Fluorescent lamp: 60lm/W
-        Formula P(W) = Ev(lx) × A(m2) / η(lm/W)*/
-        SharedPreferences prefs = getSharedPreferences("RegistrationActivity",0);
-        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
-        /*60 omdat een gemiddelde TL-Lamp 60 efficientie heeft.
-        Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm*/
-        double power = (outputValueOfLux*(double)klasOppervlakteRegistratie)/60.0;
-        return power;
-    }
-
-
-    /**Magneto data**/
-
-   /* ArrayList<Double> magnets = new ArrayList<>();
-    double average = 0;
-    int wait5 = 0;
-    long prevTurnTimer = 0;*/
-    private void updateValues(BluetoothGattCharacteristic characteristic) {
-
-       /* if (totalTurns < 471) {
-            //if (totalTurns < 5) { // to Test
-            double magnet = SensorTagData.extractMagnetoX(characteristic);
-            magnet = Math.abs(magnet);
-
-            if (wait5 == 0) {
-
-                if (magnet > average + 300 ||  magnet < average - 300) {
-                    if(totalTurns == 1){
-                        timer.start();
-                        turnTimer.start();
-                    }
-
-                    Boolean skippedTurn = false;
-                    turnTimer.stop();
-                    if(turnTimer.getElapsedTime() < 3 * prevTurnTimer && turnTimer.getElapsedTime() > 1.5 * prevTurnTimer){
-                        skippedTurn = true;
-                    }
-                    else {
-                        prevTurnTimer = turnTimer.getElapsedTime();
-                    }
-                    turnTimer.start();
-
-                    if(skippedTurn) {
-                        totalTurns ++;
-                    }
-
-                    wait5 = 6;
-
-                    totalTurns ++;
-
-                    ViewGroup.MarginLayoutParams lpimg = (ViewGroup.MarginLayoutParams) img.getLayoutParams();
-                    lpimg.leftMargin = (int) (Math.round(totalTurns * 1.7) -100);
-                    img.setLayoutParams(lpimg);
-
-                    //mTurns.setText("" + totalTurns);
-                    mDist.setText((int)(totalTurns * 2.125) + " m");
-
-                }
-            }
-            else {
-                wait5 --;
-            }
-
-            if (magnets.size() >= 5) {
-                magnets.remove(0);
-            }
-            magnets.add(magnet);
-            double sum = 0;
-            for (int i = 0; i < magnets.size(); i++) {
-                sum += magnets.get(i);
-            }
-            average = sum/magnets.size();
-
-            //TODO: reset value
-            if(totalTurns % 94 == 0) {
-                //if(totalTurns % 3 == 0) { //To test
-                addStar(totalTurns/94);
-                //addStar(totalTurns/3); //To test
-            }
-        }
-        else {
-            //finished
-            finished = 1;
-            if (finished == 1 && prevFinished == 0) {
-                prevFinished = 1;
-
-                timer.stop();
-
-                showDialog();
-            }
-        }*/
-    }
-
-    private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
-        Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer upperByte = (int) c[offset + 1] & 0xFF;
-        return (upperByte << 8) + lowerByte;
-    }
-
 
     /*************************
      * Layout Functions   *
      *************************/
 
     public void styleChart(LineChart c) {
-        //styling
+        /*styling*/
         c.setNoDataText("Er is geen data beschikbaar");
         c.setDescription("");
 
@@ -818,16 +656,72 @@ public class GraphActivity extends AppCompatActivity {
         yAxis.setDrawGridLines(false); // no grid lines
         yAxis.setDrawZeroLine(true); // draw a zero line
 
-
         c.getAxisRight().setEnabled(false); // no right axis
         c.animateX(3000);
     }
 
+
+    /*************************
+     * Lux Calculation Functions *
+     *************************/
+
+    public void getLuxValue(BluetoothGattCharacteristic c) {
+        amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
+        Log.e("test", "GetLuxVALUEMETHOD");   //Get Light intensity
+        byte[] value = c.getValue();
+        int mantissa;
+        int exponent;
+        Integer sfloat = shortUnsignedAtOffset(value, 0);  //data from sensor
+        mantissa = sfloat & 0x0FFF;
+        exponent = (sfloat & 0xF000) >> 12;
+        double magnitude = pow(2.0f, exponent);
+        outputLux = mantissa * (0.01 * magnitude);   //New output lux value
+        calculatePowerUsage(outputLux);
+    }
+
+    public void calculatePowerUsage(double outputLux){
+        double power = calculateWattFromLux(outputLux);   //Current power consumption
+        powerTotal += power;   //Getting total power, "+", this will be reduced from the "energyLeft" variable, power is CONSUMED by the lights.
+
+        if((double) i !=0.0){
+            averagePowerUsage = powerTotal/((double) i);
+        }
+        Log.e("Power: ", String.valueOf(power));
+        dataSet.setFillColor(R.color.colorAccent);
+        startDataSet.setFillColor(R.color.colorPrimaryLight);
+        energyLeft = amountEnergy - (powerTotal * 0.000222);
+        dataSet.addEntry(new Entry((float) i, (float) energyLeft));
+        startDataSet.addEntry(new Entry((float) i, (float) amountEnergy)); //Adding entry: using total power consumption.
+        lineData.notifyDataChanged(); // let the data know a dataSet changed
+        chart.notifyDataSetChanged(); // let the chart know its data changed
+        chart.invalidate(); // refresh
+        i++;
+        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
+    }
+
+    /*********************************************************************
+     *Get Watt from lux.
+     Fluorescent lamp: 60lm/W
+     Formula P(W) = Ev(lx) × A(m2) / η(lm/W)
+     60 because average TL-Lamp has a 60 efficiency.
+     Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm
+     *********************************************************************/
+
+    public double calculateWattFromLux(double outputValueOfLux){
+        SharedPreferences prefs = getSharedPreferences("RegistrationActivity",0);
+        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
+        double power = (outputValueOfLux*(double)klasOppervlakteRegistratie)/60.0;
+        return power;
+    }
+
+
+    private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer upperByte = (int) c[offset + 1] & 0xFF;
+        return (upperByte << 8) + lowerByte;
+    }
+
     public void goToPlayground(View v) {
-        //disconnect current tag connection
-        onStop();
-        //Shows toolbar with bluetooth icon
-        //showDialogue();
         showDistanceInput();
     }
 
@@ -835,9 +729,7 @@ public class GraphActivity extends AppCompatActivity {
         View v = getLayoutInflater().inflate(R.layout.input_popup, null);
         AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
         adb.setView(v);
-
         inputValue = (EditText) v.findViewById(R.id.editText);
-
         toolbar = (Toolbar) v.findViewById(R.id.toolbar);
         toolbar.setTitle("Hoeveel energie in kWh hebben jullie opgewekt?");
         toolbar.setTitleTextColor(Color.WHITE);
@@ -845,55 +737,23 @@ public class GraphActivity extends AppCompatActivity {
         alert.show();
     }
 
+   public void powerInputToGraph(View v){
+       double inputPower = 0.0;
+       try {
+           String text = inputValue.getText().toString();
+           if (!text.equals("")) {
+               inputPower = Double.parseDouble(text);
+               Toast.makeText(getApplicationContext(), "" + inputPower + "Dit Is De Toaster Text", Toast.LENGTH_LONG).show();
+           } else {
+               Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
+           }
+       }catch (Exception e){
+           System.out.println(e);
+       }
 
-    public void powerInputToGraph(View v){
-        double inputPower = 0.0;
-        try {
-            String text = inputValue.getText().toString();
-            if (!text.equals("")) {
-                inputPower = Double.parseDouble(text);
-                Toast.makeText(getApplicationContext(), "" + inputPower, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
-            }
-        }catch (Exception e){
-            System.out.println(e);
-        }
-
-
-        powerTotal -= inputPower;
-
-        dataSet.setFillColor(R.color.colorAccent);
-        startDataSet.setFillColor(R.color.colorPrimaryLight);
-        //Adding entry: using total power consumption.
-        energyLeft = amountEnergy - powerTotal;
-        dataSet.addEntry(new Entry((float) i, (float) energyLeft));
-        startDataSet.addEntry(new Entry((float) i, (float) amountEnergy));
-        lineData.notifyDataChanged(); // let the data know a dataSet changed
-        chart.notifyDataSetChanged(); // let the chart know its data changed
-        chart.invalidate(); // refresh
-        i++;
+           powerTotal -= inputPower / 0.000222;
 
     }
 
-    public void showDialogue() {
-        /*Nog bluetooth icoontje toevoegen*/
-        //Set popupscherm as view
-        View v = getLayoutInflater().inflate(R.layout.popupscherm,null);
-        AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
-        adb.setView(v);
-        //Find the toolbar view inside the activity layout
-
-        /*because view v has the popupscherm.xml view, you have to put "v.method();"
-        otherwise with this findViewById(R.id.toolbar);
-        you are trying to find the toolbar in the current set layout of activity
-        which is different from popupscherm.xml*/
-        toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        toolbar.setTitle("Ga naar de SMERGY fietsen");
-        toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.inflateMenu(R.menu.menu_main);
-        AlertDialog alert = adb.create();
-        alert.show();
-    }
 }
 
