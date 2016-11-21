@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:background="#C94f4f"
             android:id="@+id/stopGame"
-            android:text="STOP SPEL"
+            android:text="STOP SPsEL"
             android:onClick="stopGame"
             android:textColor="@color/textColorPrimary"
             android:layout_alignParentBottom="true"
