@@ -53,6 +53,22 @@ import java.util.UUID;
 
 import static java.lang.Math.pow;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import android.os.AsyncTask;
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class GraphActivity extends AppCompatActivity {
 
@@ -61,7 +77,6 @@ public class GraphActivity extends AppCompatActivity {
      ***********************/
 
     private static final String TAG = "MainActivity";
-
 
 
     /* Light Service */
@@ -124,7 +139,6 @@ public class GraphActivity extends AppCompatActivity {
     private int aantalLampenRegistratie;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,11 +174,9 @@ public class GraphActivity extends AppCompatActivity {
          *    Layout   *
          ***************/
         Button stopButton = (Button) findViewById(R.id.stopGame);
-        stopButton.setOnClickListener(new View.OnClickListener()
-        {
+        stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 stopGame();
             }
         });
@@ -216,6 +228,7 @@ public class GraphActivity extends AppCompatActivity {
      **********************/
     @Override
     protected void onResume() {
+        DatabaseHelper dbh = new DatabaseHelper(this);
         super.onResume();
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -397,7 +410,7 @@ public class GraphActivity extends AppCompatActivity {
         }
     }
 
-    private void clearDisplayValues(){
+    private void clearDisplayValues() {
         textMagneto.setText("---");
     }
 
@@ -436,7 +449,7 @@ public class GraphActivity extends AppCompatActivity {
                     Log.d(TAG, "Enabling magneto");
                     characteristic = gatt.getService(MAGNETO_SERVICE)
                             .getCharacteristic(MAGNETO_CONFIG_CHAR);
-                    characteristic.setValue(new byte[] {(byte)0x7F, (byte)0x00});
+                    characteristic.setValue(new byte[]{(byte) 0x7F, (byte) 0x00});
                     break;
                 default:
                     mHandler.sendEmptyMessage(MSG_DISMISS);
@@ -508,7 +521,7 @@ public class GraphActivity extends AppCompatActivity {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.d(TAG, "Connection State Change: "+status+" -> "+connectionState(newState));
+            Log.d(TAG, "Connection State Change: " + status + " -> " + connectionState(newState));
             if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
                 /*
                  * Once successfully connected, we must next discover all the services on the
@@ -690,12 +703,12 @@ public class GraphActivity extends AppCompatActivity {
         calculatePowerUsage(outputLux);
     }
 
-    public void calculatePowerUsage(double outputLux){
+    public void calculatePowerUsage(double outputLux) {
         double power = calculateWattFromLux(outputLux);   //Current power consumption
         powerTotal += power;   //Getting total power, "+", this will be reduced from the "energyLeft" variable, power is CONSUMED by the lights.
 
-        if((double) i !=0.0){
-            averagePowerUsage = powerTotal/((double) i);
+        if ((double) i != 0.0) {
+            averagePowerUsage = powerTotal / ((double) i);
         }
         //Log.e("Power: ", String.valueOf(power));
         dataSet.setFillColor(R.color.colorAccent);
@@ -712,25 +725,109 @@ public class GraphActivity extends AppCompatActivity {
          * Every 10 minutes, the data should be updated.
          * energyLeft variable should be stored in dB
          */
-        if(i%5 == 0){
-                DatabaseHelper dbh = new DatabaseHelper(this);
-                Classroom classroom = new Classroom();
-                classroom.setGroepsnaam(naamRegistratie);
-                classroom.setClassname(klasRegistratie);
-                classroom.setHighscore(String.valueOf(energyLeft)); //Stringify double value
-                dbh.addClassroom(classroom);
+        if (i % 5 == 0) {
 
-                Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+            /**
+             * Sync to SQLite dB
+             */
+            DatabaseHelper dbh = new DatabaseHelper(this);
+            Classroom classroom = new Classroom();
+            classroom.setGroepsnaam(naamRegistratie);
+            classroom.setClassname(klasRegistratie);
+            classroom.setHighscore(String.valueOf(energyLeft)); //Stringify double value
+            dbh.addClassroom(classroom);
+
+            Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+
+            // To implement
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+
+            if (networkInfo != null && networkInfo.isConnected()) {
+                // fetch data
+                JSONArray json = buildJSONArray();
+                String url = "http://thinkcore.be/sync/TESTPHP3.php";
+                new SendSQLiteData().execute(url, json.toString());
+            } else {
+                Log.d("CONNECTION", "There are connection issues");
+            }
         }
-       textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
+        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W" + "\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
     }
 
+    private JSONArray buildJSONArray() {
+        DatabaseHelper dbh = new DatabaseHelper(this);
+        ArrayList<Classroom> list = dbh.getAllClassrooms();
+        JSONArray classArray = new JSONArray();
+        for(int i = 0; i < list.size(); i++){
+            JSONObject classroomjson = new JSONObject();
+            try {
+                classroomjson.put("Schoolname", list.get(i).getGroepsnaam());
+                classroomjson.put("Classname", list.get(i).getClassname());
+                classroomjson.put("Highscore", list.get(i).getHighscore());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            classArray.put(classroomjson);
+        }
+        Log.d("JSONArray", classArray.toString());
+        return classArray;
+    }
+
+    private class SendSQLiteData extends AsyncTask<String, String, String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection con = null;
+            try {
+                URL url = new URL(params[0]);
+                con = (HttpURLConnection) url.openConnection();
+                con.setReadTimeout(10000 /*milliseconds*/);
+                con.setConnectTimeout(15000 /* milliseconds */);
+                con.setDoInput(true);
+                con.setDoOutput(true);
+                con.setRequestMethod("POST");
+                con.setFixedLengthStreamingMode(params[1].length());
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+
+                OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
+                Log.d("WRITER", params[1]);
+                writer.write(params[1]);
+                writer.flush();
+                writer.close();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String result = "";
+                String echo = "";
+                while((echo = br.readLine()) != null){
+                    Log.d("RESULT", echo);
+                }
+                br.close();
+
+                if(con.getResponseCode() == HttpURLConnection.HTTP_OK){
+                    Log.d("CONNECTION", con.getResponseMessage());
+                }
+
+                return "Found connection";
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (con != null) {
+                    con.disconnect();
+                }
+            }
+            return null;
+        }
+    }
+
+
     /*********************************************************************
-     *Get Watt from lux.
-     Fluorescent lamp: 60lm/W
-     Formula P(W) = Ev(lx) × A(m2) / η(lm/W)
-     60 because average TL-Lamp has a 60 efficiency.
-     Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm
+     * Get Watt from lux.
+     * Fluorescent lamp: 60lm/W
+     * Formula P(W) = Ev(lx) × A(m2) / η(lm/W)
+     * 60 because average TL-Lamp has a 60 efficiency.
+     * Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm
      *********************************************************************/
 
     public double calculateWattFromLux(double outputValueOfLux) {
@@ -752,7 +849,7 @@ public class GraphActivity extends AppCompatActivity {
         showDistanceInput();
     }
 
-    public void showDistanceInput(){
+    public void showDistanceInput() {
         View v = getLayoutInflater().inflate(R.layout.input_popup, null);
         AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
         adb.setView(v);
@@ -764,7 +861,7 @@ public class GraphActivity extends AppCompatActivity {
         alert.show();
     }
 
-    public void stopGame(){
+    public void stopGame() {
 
         new AlertDialog.Builder(this)
                 .setTitle("Stop spel?")
@@ -779,25 +876,26 @@ public class GraphActivity extends AppCompatActivity {
                         //Start new activity
                         Intent showActivity = new Intent(GraphActivity.this, EndResult.class);
                         startActivity(showActivity);
-                    }})
+                    }
+                })
                 .setNegativeButton("Neen", null).show();
     }
 
-   public void powerInputToGraph(View v){
-       double inputPower = 0.0;
-       try {
-           String text = inputValue.getText().toString();
-           if (!text.equals("")) {
-               inputPower = Double.parseDouble(text);
-               Toast.makeText(getApplicationContext(), "" + inputPower + "Dit Is De Toaster Text", Toast.LENGTH_LONG).show();
-           } else {
-               Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
-           }
-       }catch (Exception e){
-           System.out.println(e);
-       }
+    public void powerInputToGraph(View v) {
+        double inputPower = 0.0;
+        try {
+            String text = inputValue.getText().toString();
+            if (!text.equals("")) {
+                inputPower = Double.parseDouble(text);
+                Toast.makeText(getApplicationContext(), "" + inputPower + "Dit Is De Toaster Text", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
-           powerTotal -= inputPower / 0.0002777;
+        powerTotal -= inputPower / 0.0002777;
 
     }
 
