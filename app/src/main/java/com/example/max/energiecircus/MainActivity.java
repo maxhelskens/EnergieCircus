@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
         String naamRegistratie = prefs.getString("Naam", null);
         String klasRegistratie = prefs.getString("Klas", null);
-        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
-        if (naamRegistratie != null && klasRegistratie != null && klasOppervlakteRegistratie != 0) {
+        int aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
+        if (naamRegistratie != null && klasRegistratie != null && aantalLampenRegistratie != 0) {
             Intent showActivity = new Intent(this, GraphActivity.class);
             startActivity(showActivity);
         }
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         name = (EditText) findViewById(R.id.name);
         klas = (EditText) findViewById(R.id.klas);
-        aantalLampen = (EditText) findViewById(R.id.oppervlakteKlas);
+        aantalLampen = (EditText) findViewById(R.id.aantalLampen);
         registratieKnop = (Button) findViewById(R.id.registratie);
     }
 
@@ -51,7 +51,14 @@ public class MainActivity extends AppCompatActivity {
 
         String nameTxt = name.getText().toString();
         String klasTxt = klas.getText().toString();
-        int aantalLampenTxt = Integer.parseInt(aantalLampen.getText().toString());
+        int aantalLampenInt;
+
+        if (aantalLampen.getText().toString().matches("")) {
+            aantalLampenInt = 0;
+        } else {
+            aantalLampenInt = Integer.parseInt(aantalLampen.getText().toString());
+
+        }
 
         boolean inputOk = true;
 
@@ -67,24 +74,24 @@ public class MainActivity extends AppCompatActivity {
             inputOk = false;
         }
 
+
         if (inputOk) {
         /*Nodig voor SharedPreferences*/
             editor.putString("Naam", nameTxt);
             editor.putString("Klas", klasTxt);
-            editor.putInt("AantalLampen", aantalLampenTxt);
+            editor.putInt("AantalLampen", aantalLampenInt);
             editor.commit();
 
         /*Lezen van sharedPreferences*/
             SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
             String naamRegistratie = prefs.getString("Naam", null);
             String klasRegistratie = prefs.getString("Klas", null);
-            int klasOppervlakteRegistratie = prefs.getInt("AantalLampen", 0);
-            if (naamRegistratie != null && klasRegistratie != null && klasOppervlakteRegistratie != 0) {
+            int aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
+            if (naamRegistratie != null && klasRegistratie != null && aantalLampenRegistratie != 0) {
                 Log.e("naam", naamRegistratie);
                 Log.e("klas", klasRegistratie);
-                Log.e("aantal lampen", String.valueOf(klasOppervlakteRegistratie));
+                Log.e("aantal lampen", String.valueOf(aantalLampenRegistratie));
             }
-
             Intent showActivity = new Intent(this, GraphActivity.class);
             startActivity(showActivity);
         }
