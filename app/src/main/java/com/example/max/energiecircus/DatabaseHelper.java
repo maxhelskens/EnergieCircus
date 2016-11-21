@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.hardware.camera2.params.StreamConfigurationMap;
 
 import java.util.ArrayList;
 
@@ -44,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         try{
-            contentValues.put(SCHOOL, classroom.getSchoolname());
+            contentValues.put(SCHOOL, classroom.getGroepsnaam());
             contentValues.put(CLASS, classroom.getClassname());
             contentValues.put(HIGHSCORE, classroom.getHighscore());
             db.insert(TABLE, null, contentValues);
@@ -72,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 classroom.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 classroom.setClassname(cursor.getString(cursor.getColumnIndex(CLASS)));
                 classroom.setHighscore(cursor.getString(cursor.getColumnIndex(HIGHSCORE)));
-                classroom.setSchoolname(cursor.getString(cursor.getColumnIndex(SCHOOL)));
+                classroom.setGroepsnaam(cursor.getString(cursor.getColumnIndex(SCHOOL)));
                 classrooms.add(classroom);
                 cursor.moveToNext();
             }

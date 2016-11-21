@@ -7,7 +7,7 @@ package com.example.max.energiecircus;
 public class Classroom {
 
     private int id;
-    private String schoolname;
+    private String groepsnaam;
     private String classname;
     private String highscore;
 
@@ -19,12 +19,12 @@ public class Classroom {
         this.id = id;
     }
 
-    public String getSchoolname() {
-        return schoolname;
+    public String getGroepsnaam() {
+        return groepsnaam;
     }
 
-    public void setSchoolname(String schoolname) {
-        this.schoolname = schoolname;
+    public void setGroepsnaam(String name) {
+        this.groepsnaam = name;
     }
 
     public String getClassname() {

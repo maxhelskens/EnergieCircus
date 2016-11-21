@@ -119,6 +119,10 @@ public class GraphActivity extends AppCompatActivity {
     private double powerUsageLamp;
     private EditText inputValue;
 
+    private String naamRegistratie;
+    private String klasRegistratie;
+    private int aantalLampenRegistratie;
+
 
 
     @Override
@@ -155,7 +159,6 @@ public class GraphActivity extends AppCompatActivity {
         /***************
          *    Layout   *
          ***************/
-
         Button stopButton = (Button) findViewById(R.id.stopGame);
         stopButton.setOnClickListener(new View.OnClickListener()
         {
@@ -165,7 +168,6 @@ public class GraphActivity extends AppCompatActivity {
                 stopGame();
             }
         });
-
 
         chart = (LineChart) findViewById(R.id.chart);
         styleChart(chart);
@@ -200,15 +202,18 @@ public class GraphActivity extends AppCompatActivity {
         chart.invalidate(); // refresh
         textMagneto = (TextView) findViewById(R.id.magnetoValue);
 
-
-
+        /**
+         * Loading shared preferences into new class
+         */
+        SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
+        naamRegistratie = prefs.getString("Naam", null);
+        klasRegistratie = prefs.getString("Klas", null);
+        aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
     }
-
 
     /**********************
      * BLE Functions   *
      **********************/
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -308,7 +313,6 @@ public class GraphActivity extends AppCompatActivity {
                 /*
                  * Make a connection with the device
                  */
-
                 connectToDevice(device);
                 /*Display progress UI*/
                 mHandler.sendMessage(Message.obtain(null, MSG_PROGRESS, "Connecting to " + device.getName() + "..."));
@@ -693,7 +697,7 @@ public class GraphActivity extends AppCompatActivity {
         if((double) i !=0.0){
             averagePowerUsage = powerTotal/((double) i);
         }
-        Log.e("Power: ", String.valueOf(power));
+        //Log.e("Power: ", String.valueOf(power));
         dataSet.setFillColor(R.color.colorAccent);
         startDataSet.setFillColor(R.color.colorPrimaryLight);
         energyLeft = amountEnergy - (powerTotal * 0.0002777);
@@ -702,9 +706,23 @@ public class GraphActivity extends AppCompatActivity {
         lineData.notifyDataChanged(); // let the data know a dataSet changed
         chart.notifyDataSetChanged(); // let the chart know its data changed
         chart.invalidate(); // refresh
-        i++;
+        i++; //Every second i gets increased
 
-       //textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
+        /**
+         * Every 10 minutes, the data should be updated.
+         * energyLeft variable should be stored in dB
+         */
+        if(i%5 == 0){
+                DatabaseHelper dbh = new DatabaseHelper(this);
+                Classroom classroom = new Classroom();
+                classroom.setGroepsnaam(naamRegistratie);
+                classroom.setClassname(klasRegistratie);
+                classroom.setHighscore(String.valueOf(energyLeft)); //Stringify double value
+                dbh.addClassroom(classroom);
+
+                Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+        }
+       textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
     }
 
     /*********************************************************************
@@ -716,13 +734,11 @@ public class GraphActivity extends AppCompatActivity {
      *********************************************************************/
 
     public double calculateWattFromLux(double outputValueOfLux) {
-        SharedPreferences prefs = getSharedPreferences("RegistrationActivity", 0);
-        int aantalLampenRegistratie = prefs.getInt("aantalLampen", 0); //See MainActivity, the aantalLampen is saved there.
         double power = 0.0;
-        minLuxValue = 200.0; //Can be changed. Hardcoded to 200 lux. (0-200 Off <-> 200-inf On)
+        minLuxValue = 30.0; //Can be changed. Hardcoded to 200 lux. (0-200 Off <-> 200-inf On)
         powerUsageLamp = 28.0; //http://www.t5-adapter.nl/Webwinkel-Page-148527/Informatie.html#.WDMKQ9XhCUk. TL-5.
         if (outputValueOfLux > minLuxValue)
-            power = (double) aantalLampenRegistratie * powerUsageLamp; //Counting power usage of lamps, using lowest energy wattage for tl-5 lamps; depending on the amount of lamps in the classroom
+            power = (double) aantalLampenRegistratie * powerUsageLamp; //Counting power usage of lamps, using lowest energy wattage for tl-5 lamps; depending on the amount of lamps in the classroom.
         return power;
     }
 
