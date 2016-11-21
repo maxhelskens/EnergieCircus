@@ -19,11 +19,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RegistrationActivity"
-            android:screenOrientation="landscape"/>
-        <activity
             android:name=".GraphActivity"
-            android:screenOrientation="landscape"/>
+            android:screenOrientation="landscape" />
+        <activity android:name=".EndResult"></activity>
     </application>
 
 </manifest>

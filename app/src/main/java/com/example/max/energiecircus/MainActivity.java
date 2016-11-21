@@ -23,17 +23,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //File name and mode. Mode "0" is private mode. File name is .java class file name.
+        SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity",0);
+        editor = SharedPreferences.edit();
+
+        //Check if school is still logged in
+        SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
+        String naamRegistratie = prefs.getString("Naam", null);
+        String klasRegistratie = prefs.getString("Klas", null);
+        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
+        if (naamRegistratie != null && klasRegistratie != null && klasOppervlakteRegistratie != 0) {
+            Intent showActivity = new Intent(this, GraphActivity.class);
+            startActivity(showActivity);
+        }
+
         setContentView(R.layout.activity_registration);
 
         name = (EditText) findViewById(R.id.name);
         klas = (EditText) findViewById(R.id.klas);
         klasOpp = (EditText) findViewById(R.id.oppervlakteKlas);
         registratieKnop = (Button) findViewById(R.id.registratie);
-
-        //File name and mode. Mode "0" is private mode. File name is .java class file name.
-        SharedPreferences = getApplicationContext().getSharedPreferences("RegistrationActivity",0);
-        editor = SharedPreferences.edit();
-
     }
 
     public void registreren(View v){
@@ -42,34 +52,41 @@ public class MainActivity extends AppCompatActivity {
         String klasTxt = klas.getText().toString();
         int klasOppInt = Integer.parseInt(klasOpp.getText().toString());
 
+        boolean inputOk = true;
+
         /*Fool proof: als ze iets vergeten in te vullen. Gebruik maken van Toast.*/
         if(name.getText().length()<=0){
             Toast.makeText(MainActivity.this, "Kies een naam", Toast.LENGTH_SHORT).show();
+            inputOk = false;
         }
         else if(klas.getText().length()<=0){
             Toast.makeText(MainActivity.this, "Kies een klas", Toast.LENGTH_SHORT).show();
+            inputOk = false;
         }else if(klasOpp.getText().length()<=0){
             Toast.makeText(MainActivity.this, "Je moet de oppervlakte van je klas ingeven!", Toast.LENGTH_SHORT).show();
+            inputOk = false;
         }
 
-        /*Nodig voor SharedPreferences*/
-        editor.putString("Naam", nameTxt);
-        editor.putString("Klas", klasTxt);
-        editor.putInt("KlasOpp", klasOppInt);
-        editor.commit();
+        if (inputOk) {
+            /*Nodig voor SharedPreferences*/
+            editor.putString("Naam", nameTxt);
+            editor.putString("Klas", klasTxt);
+            editor.putInt("KlasOpp", klasOppInt);
+            editor.commit();
 
-        SharedPreferences prefs = getSharedPreferences("RegistrationActivity",0);
-        String naamRegistratie = prefs.getString("Naam",null);
-        String klasRegistratie = prefs.getString("Klas",null);
-        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
-        if(naamRegistratie !=null && klasRegistratie !=null && klasOppervlakteRegistratie != 0){
-            Log.e("naam",naamRegistratie);
-            Log.e("klas",klasRegistratie);
-            Log.e("klasOppervklate", String.valueOf(klasOppervlakteRegistratie));
+            SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
+            String naamRegistratie = prefs.getString("Naam", null);
+            String klasRegistratie = prefs.getString("Klas", null);
+            int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
+            if (naamRegistratie != null && klasRegistratie != null && klasOppervlakteRegistratie != 0) {
+                Log.e("naam", naamRegistratie);
+                Log.e("klas", klasRegistratie);
+                Log.e("klasOppervklate", String.valueOf(klasOppervlakteRegistratie));
+            }
+
+            Intent showActivity = new Intent(this, GraphActivity.class);
+            startActivity(showActivity);
         }
-
-        Intent showActivity = new Intent(this, GraphActivity.class);
-        startActivity(showActivity);
 
     }
 

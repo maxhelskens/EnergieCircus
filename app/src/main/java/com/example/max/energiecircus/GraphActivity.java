@@ -18,6 +18,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -155,6 +156,16 @@ public class GraphActivity extends AppCompatActivity {
         /***************
          *    Layout   *
          ***************/
+
+        Button stopButton = (Button) findViewById(R.id.stopGame);
+        stopButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                stopGame();
+            }
+        });
 
 
         chart = (LineChart) findViewById(R.id.chart);
@@ -735,8 +746,22 @@ public class GraphActivity extends AppCompatActivity {
     }
 
     public void stopGame(){
-        onStop(); //disconnect tag sensor
-        getApplicationContext().getSharedPreferences("RegistrationActivity", 0).edit().clear().commit(); //clear preferences
+
+        new AlertDialog.Builder(this)
+                .setTitle("Stop spel?")
+                .setMessage("Ben je zeker dat je het spel wilt stoppen?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Ja", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        onStop(); //disconnect tag sensor
+                        getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
+
+                        //Start new activity
+                        Intent showActivity = new Intent(GraphActivity.this, EndResult.class);
+                        startActivity(showActivity);
+                    }})
+                .setNegativeButton("Neen", null).show();
     }
 
    public void powerInputToGraph(View v){
