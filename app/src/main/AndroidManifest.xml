@@ -18,8 +18,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegistrationActivity"></activity>
-        <activity android:name=".GraphActivity" />
+        <activity
+            android:name=".RegistrationActivity"
+            android:screenOrientation="landscape"/>
+        <activity
+            android:name=".GraphActivity"
+            android:screenOrientation="landscape"/>
     </application>
 
 </manifest>
