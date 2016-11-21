@@ -39,7 +39,7 @@
         />
 
     <EditText
-        android:id="@+id/oppervlakteKlas"
+        android:id="@+id/aantalLampen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"

@@ -107,17 +107,16 @@ public class GraphActivity extends AppCompatActivity {
     /*Lux*/
     private int i = 0;
 
-    /*Needed for magneto*/
-    private int totalTurns = 0;
-    private int finished = 0;
-    private int prevFinished = 0;
+
     private Stopwatch timerLux = new Stopwatch();
+
     private double outputLux;
     private double amountEnergy;
     private double powerTotal = 0;
     private double energyLeft;
     private double averagePowerUsage;
-
+    private double minLuxValue;
+    private double powerUsageLamp;
     private EditText inputValue;
 
 
@@ -704,7 +703,8 @@ public class GraphActivity extends AppCompatActivity {
         chart.notifyDataSetChanged(); // let the chart know its data changed
         chart.invalidate(); // refresh
         i++;
-        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
+
+       //textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W"+"\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
     }
 
     /*********************************************************************
@@ -715,13 +715,16 @@ public class GraphActivity extends AppCompatActivity {
      Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm
      *********************************************************************/
 
-    public double calculateWattFromLux(double outputValueOfLux){
-        SharedPreferences prefs = getSharedPreferences("RegistrationActivity",0);
-        int klasOppervlakteRegistratie = prefs.getInt("KlasOpp", 0);
-        double power = (outputValueOfLux*(double)klasOppervlakteRegistratie)/60.0;
+    public double calculateWattFromLux(double outputValueOfLux) {
+        SharedPreferences prefs = getSharedPreferences("RegistrationActivity", 0);
+        int aantalLampenRegistratie = prefs.getInt("aantalLampen", 0); //See MainActivity, the aantalLampen is saved there.
+        double power = 0.0;
+        minLuxValue = 200.0; //Can be changed. Hardcoded to 200 lux. (0-200 Off <-> 200-inf On)
+        powerUsageLamp = 28.0; //http://www.t5-adapter.nl/Webwinkel-Page-148527/Informatie.html#.WDMKQ9XhCUk. TL-5.
+        if (outputValueOfLux > minLuxValue)
+            power = (double) aantalLampenRegistratie * powerUsageLamp; //Counting power usage of lamps, using lowest energy wattage for tl-5 lamps; depending on the amount of lamps in the classroom
         return power;
     }
-
 
     private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
         Integer lowerByte = (int) c[offset] & 0xFF;
