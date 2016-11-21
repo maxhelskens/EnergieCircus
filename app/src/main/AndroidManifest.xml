@@ -20,7 +20,6 @@
         </activity>
         <activity android:name=".RegistrationActivity"></activity>
         <activity android:name=".GraphActivity" />
-        <activity android:name=".BikeActivity"></activity>
     </application>
 
 </manifest>

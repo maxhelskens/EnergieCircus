@@ -18,11 +18,11 @@
         tools:context="com.example.max.energiecircus.GraphActivity"
         android:layout_width="wrap_content">
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/chart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text ="kwH"
+            android:id="@+id/magnetoValue"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,13 +36,40 @@
             android:textColor="@color/textColorPrimary"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
+            android:onClick="goToPlayground" />
+
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:id="@+id/trophyIcon"
+            android:src="@drawable/trophynew2"
             android:onClick="goToPlayground"
-            />
-        <TextView
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@+id/speeltijd_button"
+            android:layout_alignTop="@+id/speeltijd_button" />
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text ="Test"
-            android:id="@+id/magnetoValue"/>
+            android:background="#C94f4f"
+            android:id="@+id/stopGame"
+            android:text="STOP SPEL"
+            android:onClick="stopGame"
+            android:textColor="@color/textColorPrimary"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
     </RelativeLayout>
 
 </LinearLayout>

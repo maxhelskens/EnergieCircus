@@ -279,7 +279,6 @@ public class GraphActivity extends AppCompatActivity {
                 menu.add(0, mDevices.keyAt(i), 0, device.getName());
             }
         }
-
         return true;
     }
 
@@ -327,7 +326,6 @@ public class GraphActivity extends AppCompatActivity {
             mLEScanner.startScan(filters, settings, mScanCallback);
         }
         setProgressBarIndeterminateVisibility(true);
-
         mHandler.postDelayed(mStopRunnable, 2500);
     }
 
@@ -336,7 +334,6 @@ public class GraphActivity extends AppCompatActivity {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         } else {
             mLEScanner.stopScan(mScanCallback);
-
         }
         setProgressBarIndeterminateVisibility(false);
     }
@@ -689,7 +686,7 @@ public class GraphActivity extends AppCompatActivity {
         Log.e("Power: ", String.valueOf(power));
         dataSet.setFillColor(R.color.colorAccent);
         startDataSet.setFillColor(R.color.colorPrimaryLight);
-        energyLeft = amountEnergy - (powerTotal * 0.000222);
+        energyLeft = amountEnergy - (powerTotal * 0.0002777);
         dataSet.addEntry(new Entry((float) i, (float) energyLeft));
         startDataSet.addEntry(new Entry((float) i, (float) amountEnergy)); //Adding entry: using total power consumption.
         lineData.notifyDataChanged(); // let the data know a dataSet changed
@@ -737,6 +734,11 @@ public class GraphActivity extends AppCompatActivity {
         alert.show();
     }
 
+    public void stopGame(){
+        onStop(); //disconnect tag sensor
+        getApplicationContext().getSharedPreferences("RegistrationActivity", 0).edit().clear().commit(); //clear preferences
+    }
+
    public void powerInputToGraph(View v){
        double inputPower = 0.0;
        try {
@@ -751,7 +753,7 @@ public class GraphActivity extends AppCompatActivity {
            System.out.println(e);
        }
 
-           powerTotal -= inputPower / 0.000222;
+           powerTotal -= inputPower / 0.0002777;
 
     }
 
