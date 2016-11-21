@@ -1,69 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--gravity: center text for wrap_content in vertical orientation-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_registration"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:gravity="center"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.max.energiecircus.MainActivity">
 
-    tools:context="com.example.max.energiecircus.RegistrationActivity">
-
-    <EditText
+    <TextView
         android:id="@+id/name"
+        android:text="Groepsnaam"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textAlignment="center"
-        android:textSize="60dp"
-        android:hint="@string/Groepsnaam"
-        android:inputType="text"
-        />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <EditText
+        android:id="@+id/editText_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_below="@+id/name"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
         android:id="@+id/klas"
+        android:text="Class"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:layout_marginTop="50dp"
-        android:layout_gravity="center_horizontal"
-        android:textSize="60dp"
-        android:hint="@string/Klas"
-        android:inputType="text"
-        />
+        android:layout_below="@+id/editText_name"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true" />
 
     <EditText
-        android:id="@+id/aantalLampen"
+        android:id="@+id/editText_klas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:layout_marginTop="50dp"
-        android:layout_gravity="center_horizontal"
-        android:textSize="40dp"
-        android:hint="Aantal lampen"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_below="@+id/klas"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true" />
+
+    <TextView
+        android:id="@+id/aantalLampen"
+        android:text="Aantal lampen?"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText_klas"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true" />
+
+
+    <EditText
+        android:id="@+id/editText_aantalLampen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:inputType="number"
-        />
+        android:ems="10"
+        android:layout_below="@+id/aantalLampen"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 
     <Button
         android:id="@+id/registratie"
         android:onClick="registreren"
+        android:text="Start!"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:maxHeight="150dp"
-        android:maxWidth="150dp"
-        android:text="START!"
-        android:textColor="@color/textColorPrimary"
+        android:layout_below="@+id/editText_aantalLampen"
+        android:layout_alignParentStart="true"
         android:background="@color/colorPrimaryDark"
-        />
-</LinearLayout>
+        android:textColor="@color/textColorPrimary"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true" />
 
+
+
+    >
+
+</RelativeLayout>

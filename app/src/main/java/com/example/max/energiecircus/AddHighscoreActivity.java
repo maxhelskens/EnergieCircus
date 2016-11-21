@@ -17,23 +17,10 @@ public class AddHighscoreActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       /* setContentView(R.layout.activity_add_highscore);
-
-        editText_school = (EditText) findViewById(R.id.editText_school);
-        editText_class = (EditText) findViewById(R.id.editText_class);
-        editText_highscore = (EditText) findViewById(R.id.editText_highscore);
-        button_save = (Button) findViewById(R.id.button_save);*/
-
-        button_save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveHighscore();
-            }
-        });
     }
 
     //saveHighscore in SQLite
-    private void saveHighscore() {
+    private void saveScore() {
         DatabaseHelper dbh = new DatabaseHelper(this);
         Classroom classroom = new Classroom();
         classroom.setSchoolname(editText_school.getText().toString());

@@ -38,12 +38,13 @@ public class MainActivity extends AppCompatActivity {
             Intent showActivity = new Intent(this, GraphActivity.class);
             startActivity(showActivity);
         }
-
+        //set view
         setContentView(R.layout.activity_registration);
 
-        name = (EditText) findViewById(R.id.name);
-        klas = (EditText) findViewById(R.id.klas);
-        aantalLampen = (EditText) findViewById(R.id.aantalLampen);
+        //declare variables
+        name = (EditText) findViewById(R.id.editText_name);
+        klas = (EditText) findViewById(R.id.editText_klas);
+        aantalLampen = (EditText) findViewById(R.id.editText_aantalLampen);
         registratieKnop = (Button) findViewById(R.id.registratie);
     }
 
@@ -52,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         String nameTxt = name.getText().toString();
         String klasTxt = klas.getText().toString();
         int aantalLampenInt;
-
         if (aantalLampen.getText().toString().matches("")) {
             aantalLampenInt = 0;
         } else {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Kies een klas", Toast.LENGTH_SHORT).show();
             inputOk = false;
         } else if (aantalLampen.getText().length() <= 0) {
-            Toast.makeText(MainActivity.this, "Hoeveel lampen tellen je klas?", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Hoeveel lampen telt je klas?", Toast.LENGTH_SHORT).show();
             inputOk = false;
         }
 
