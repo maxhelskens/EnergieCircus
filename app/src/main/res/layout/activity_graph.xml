@@ -39,16 +39,17 @@
             android:onClick="goToPlayground" />
 
 
-        <ImageView
-            android:layout_width="50dp"
+        <Button
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:id="@+id/trophyIcon"
-            android:src="@drawable/trophynew2"
-            android:onClick="goToPlayground"
+            android:background="#C94f4f"
+            android:id="@+id/stopGame"
+            android:text="STOP SPEL"
+            android:onClick="stopGame"
+            android:textColor="@color/textColorPrimary"
             android:layout_alignParentBottom="true"
-            android:layout_toLeftOf="@+id/speeltijd_button"
-            android:layout_alignTop="@+id/speeltijd_button" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart"
@@ -58,17 +59,18 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
-        <Button
-            android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:background="#C94f4f"
-            android:id="@+id/stopGame"
-            android:text="STOP SPsEL"
-            android:onClick="stopGame"
-            android:textColor="@color/textColorPrimary"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:background="@color/colorPrimary"
+            android:id="@+id/trophyIcon"
+            android:src="@drawable/trophynew"
+            android:onClick="goToPlayground"
+            android:layout_toLeftOf="@+id/speeltijd_button"
+            android:layout_toStartOf="@+id/speeltijd_button"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_alignTop="@+id/speeltijd_button" />
 
     </RelativeLayout>
 
