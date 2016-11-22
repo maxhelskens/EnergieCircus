@@ -1,10 +1,12 @@
 package com.example.max.energiecircus;
 
+import java.io.Serializable;
+
 /**
  * Created by Evert on 11/10/2016.
  */
 
-public class Classroom {
+public class Classroom implements Serializable{
 
     private int id;
     private String groepsnaam;

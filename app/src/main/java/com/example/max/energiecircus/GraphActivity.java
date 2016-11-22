@@ -47,6 +47,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -70,7 +71,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class GraphActivity extends AppCompatActivity {
+public class GraphActivity extends AppCompatActivity{
 
     /***********************
      * BLE parameters   *
@@ -143,6 +144,7 @@ public class GraphActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
+
 
         /************
          *    BLE   *
@@ -690,7 +692,7 @@ public class GraphActivity extends AppCompatActivity {
      *************************/
 
     public void getLuxValue(BluetoothGattCharacteristic c) {
-        amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
+               amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
         Log.e("test", "GetLuxVALUEMETHOD");   //Get Light intensity
         byte[] value = c.getValue();
         int mantissa;
@@ -704,6 +706,8 @@ public class GraphActivity extends AppCompatActivity {
     }
 
     public void calculatePowerUsage(double outputLux) {
+        Intent intention = getIntent();
+        Classroom classroom = (Classroom)intention.getSerializableExtra("classroomObject");
         double power = calculateWattFromLux(outputLux);   //Current power consumption
         powerTotal += power;   //Getting total power, "+", this will be reduced from the "energyLeft" variable, power is CONSUMED by the lights.
 
@@ -725,26 +729,31 @@ public class GraphActivity extends AppCompatActivity {
          * Every 10 minutes, the data should be updated.
          * energyLeft variable should be stored in dB
          */
-        if (i % 5 == 0) {
+        if (i % 10 == 0) {
 
             /**
              * Sync to SQLite dB
              */
             DatabaseHelper dbh = new DatabaseHelper(this);
-            Classroom classroom = new Classroom();
-            classroom.setGroepsnaam(naamRegistratie);
-            classroom.setClassname(klasRegistratie);
-            classroom.setHighscore(String.valueOf(energyLeft)); //Stringify double value
-            dbh.addClassroom(classroom);
+            for(int i=0;i<dbh.getAllClassrooms().size();i++){
+                Log.e("naamregistratie: " , naamRegistratie);
+                Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
+                if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
+                    Log.e("energy left : " , String.valueOf(energyLeft));
+                    dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
+                    Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
+                    Log.e("Groepsnaam= ", classroom.getGroepsnaam());
+                }
+            }
 
-            Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+           // Log.e("Energy left: ", String.valueOf(classroom.getGroepsnaam()));
 
-            // To implement
+            //To implement
             ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
             if (networkInfo != null && networkInfo.isConnected()) {
-                // fetch data
+                //Fetch data
                 JSONArray json = buildJSONArray();
                 String url = "http://thinkcore.be/sync/TESTPHP3.php";
                 new SendSQLiteData().execute(url, json.toString());
@@ -752,7 +761,7 @@ public class GraphActivity extends AppCompatActivity {
                 Log.d("CONNECTION", "There are connection issues");
             }
         }
-        textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W" + "\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
+       // textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W" + "\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
     }
 
     private JSONArray buildJSONArray() {
@@ -872,10 +881,11 @@ public class GraphActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         onStop(); //disconnect tag sensor
                         getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
-
                         //Start new activity
                         Intent showActivity = new Intent(GraphActivity.this, EndResult.class);
                         startActivity(showActivity);
+                        //syncen met SQLite
+                        //naar dB
                     }
                 })
                 .setNegativeButton("Neen", null).show();

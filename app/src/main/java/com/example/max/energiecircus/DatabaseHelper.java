@@ -2,9 +2,12 @@ package com.example.max.energiecircus;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -34,19 +37,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public void removeAll(){
+        SQLiteDatabase db = this.getWritableDatabase(); // helper is object extends SQLiteOpenHelper
+        db.delete(TABLE, null, null);
+    }
+
     /**
      * Insert a new highscore into the database
      * @param classroom
      * @return
      */
     public boolean addClassroom(Classroom classroom){
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         try{
             contentValues.put(SCHOOL, classroom.getGroepsnaam());
             contentValues.put(CLASS, classroom.getClassname());
             contentValues.put(HIGHSCORE, classroom.getHighscore());
+            Log.e("Insert statement", classroom.getHighscore());
             db.insert(TABLE, null, contentValues);
+            db.close();
+            return true;
+        }
+        catch (Exception e){
+            db.close();
+            return false;
+        }
+    }
+    public boolean updateHighscore(Classroom classroom, String groepsNaam, String highScore){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        try{
+            contentValues.put(HIGHSCORE, highScore);
+
+            String[] args = new String[]{groepsNaam};
+
+            db.update(TABLE, contentValues, "school=?", args);
             db.close();
             return true;
         }

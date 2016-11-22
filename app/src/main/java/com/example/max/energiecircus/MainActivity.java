@@ -12,7 +12,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.Serializable;
+
+public class MainActivity extends AppCompatActivity{
 
     SharedPreferences SharedPreferences;
     EditText name;
@@ -59,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
             aantalLampenInt = Integer.parseInt(aantalLampen.getText().toString());
 
         }
-
         boolean inputOk = true;
 
         /*Fool proof: als ze iets vergeten in te vullen. Gebruik maken van Toast.*/
@@ -92,7 +93,16 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("klas", klasRegistratie);
                 Log.e("aantal lampen", String.valueOf(aantalLampenRegistratie));
             }
+
+            DatabaseHelper dbh = new DatabaseHelper(this);
+            Classroom classroom = new Classroom();
+            classroom.setGroepsnaam(naamRegistratie);
+            classroom.setClassname(klasRegistratie);
+            classroom.setHighscore(String.valueOf(0)); //Stringify double value
+            dbh.addClassroom(classroom);
+            Log.e("ClassRoom added: ", classroom.getGroepsnaam());
             Intent showActivity = new Intent(this, GraphActivity.class);
+            showActivity.putExtra("classroomObject", classroom);
             startActivity(showActivity);
         }
 
