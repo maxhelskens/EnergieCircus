@@ -23,6 +23,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -69,6 +72,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.Math.pow;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class GraphActivity extends AppCompatActivity{
@@ -144,7 +151,6 @@ public class GraphActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
-
 
         /************
          *    BLE   *
@@ -692,7 +698,7 @@ public class GraphActivity extends AppCompatActivity{
      *************************/
 
     public void getLuxValue(BluetoothGattCharacteristic c) {
-               amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
+        amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
         Log.e("test", "GetLuxVALUEMETHOD");   //Get Light intensity
         byte[] value = c.getValue();
         int mantissa;
@@ -746,7 +752,7 @@ public class GraphActivity extends AppCompatActivity{
                 }
             }
 
-           // Log.e("Energy left: ", String.valueOf(classroom.getGroepsnaam()));
+            Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
 
             //To implement
             ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -882,7 +888,7 @@ public class GraphActivity extends AppCompatActivity{
                         onStop(); //disconnect tag sensor
                         getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
                         //Start new activity
-                        Intent showActivity = new Intent(GraphActivity.this, EndResult.class);
+                        Intent showActivity = new Intent(GraphActivity.this, EndResultActivity.class);
                         startActivity(showActivity);
                         //syncen met SQLite
                         //naar dB
