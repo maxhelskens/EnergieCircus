@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity{
             if (naamRegistratie != null && klasRegistratie != null && aantalLampenRegistratie != 0) {
                 Log.e("naam", naamRegistratie);
                 Log.e("klas", klasRegistratie);
-                Log.e("aantal lampen", String.valueOf(aantalLampenRegistratie));
+                Log.e("aantal lasmpen", String.valueOf(aantalLampenRegistratie));
             }
 
             DatabaseHelper dbh = new DatabaseHelper(this);

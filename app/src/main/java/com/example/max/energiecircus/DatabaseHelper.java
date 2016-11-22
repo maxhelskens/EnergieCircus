@@ -85,7 +85,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Get all classrooms with a highscore from the database
+     * Get all classrosoms with a highscore from the database
      * @return
      */
     public ArrayList<Classroom> getAllClassrooms(){

@@ -720,7 +720,7 @@ public class GraphActivity extends AppCompatActivity{
         if ((double) i != 0.0) {
             averagePowerUsage = powerTotal / ((double) i);
         }
-        //Log.e("Power: ", String.valueOf(power));
+        //Log.e("Powser: ", String.valueOf(power));
         dataSet.setFillColor(R.color.colorAccent);
         startDataSet.setFillColor(R.color.colorPrimaryLight);
         energyLeft = amountEnergy - (powerTotal * 0.0002777);
@@ -742,7 +742,7 @@ public class GraphActivity extends AppCompatActivity{
              */
             DatabaseHelper dbh = new DatabaseHelper(this);
             for(int i=0;i<dbh.getAllClassrooms().size();i++){
-                Log.e("naamregistratie: " , naamRegistratie);
+                Log.e("naamresgistratie: " , naamRegistratie);
                 Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                 if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
                     Log.e("energy left : " , String.valueOf(energyLeft));
