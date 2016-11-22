@@ -23,6 +23,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,19 +50,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.Math.pow;
-
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.os.AsyncTask;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -68,6 +61,10 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.Math.pow;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class GraphActivity extends AppCompatActivity {
@@ -725,7 +722,7 @@ public class GraphActivity extends AppCompatActivity {
          * Every 10 minutes, the data should be updated.
          * energyLeft variable should be stored in dB
          */
-        if (i % 5 == 0) {
+        if (i % 100000 == 0) {
 
             /**
              * Sync to SQLite dB
@@ -874,7 +871,7 @@ public class GraphActivity extends AppCompatActivity {
                         getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
 
                         //Start new activity
-                        Intent showActivity = new Intent(GraphActivity.this, EndResult.class);
+                        Intent showActivity = new Intent(GraphActivity.this, EndResultActivity.class);
                         startActivity(showActivity);
                     }
                 })

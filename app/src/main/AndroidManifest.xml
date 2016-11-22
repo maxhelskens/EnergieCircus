@@ -23,7 +23,7 @@
         <activity
             android:name=".GraphActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".EndResult"></activity>
+        <activity android:name=".EndResultActivity"></activity>
     </application>
 
 </manifest>

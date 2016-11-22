@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<Classroom> getAllClassrooms(){
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<Classroom> classrooms = new ArrayList<Classroom>();
-        Cursor cursor = db.rawQuery("select * from " + TABLE, null);
+        Cursor cursor = db.rawQuery("select * from " + TABLE + " order by " + HIGHSCORE, null);
         cursor.moveToFirst();
         try{
             while(!cursor.isAfterLast()){
