@@ -891,7 +891,7 @@ public class GraphActivity extends AppCompatActivity{
                         Intent showActivity = new Intent(GraphActivity.this, EndResultActivity.class);
                         startActivity(showActivity);
                         //syncen met SQLite
-                        //naar dB
+                        //naar dBs
                     }
                 })
                 .setNegativeButton("Neen", null).show();
