@@ -5,9 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-   <!-- <include
-        layout="@layout/popupscherm"/>-->
-
     <RelativeLayout
         android:id="@+id/activity_graph"
         android:layout_height="wrap_content"
@@ -64,7 +61,7 @@
             android:background="@color/colorPrimary"
             android:id="@+id/trophyIcon"
             android:src="@drawable/trophynew"
-            android:onClick="goToPlayground"
+            android:onClick="viewScore"
             android:layout_toLeftOf="@+id/speeltijd_button"
             android:layout_toStartOf="@+id/speeltijd_button"
             android:layout_marginRight="16dp"

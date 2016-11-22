@@ -32,6 +32,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
@@ -50,20 +52,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.Math.pow;
-
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.os.AsyncTask;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -127,6 +118,23 @@ public class GraphActivity extends AppCompatActivity{
     private LineData lineData;
     private TextView textMagneto;
 
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter recAdapter;
+    private RecyclerView.LayoutManager recLayoutManager;
+
+    private ArrayList<Classroom> dataSetClasses = new ArrayList<Classroom>();
+
+    private static String url_all_schools = "http://www.thinkcore.be/sync/get_schools.php";
+
+    private Classroom classroom;
+
+
+    // Creating JSON Parser object
+    JSONParser jParser = new JSONParser();
+
+    // products JSONArray
+    JSONArray schools = null;
+
     /*Lux*/
     private int i = 0;
 
@@ -145,6 +153,8 @@ public class GraphActivity extends AppCompatActivity{
     private String naamRegistratie;
     private String klasRegistratie;
     private int aantalLampenRegistratie;
+
+    private AlertDialog alert;
 
 
     @Override
@@ -200,6 +210,7 @@ public class GraphActivity extends AppCompatActivity{
         /**
          * Creating the entries for the Lux values. Every entry will be added to the dataset and operations will be performed.
          */
+        dataSet = new LineDataSet(entries, "Lux"); // add entries to dataset
         dataSet = new LineDataSet(entries, "Lux"); // add entries to dataset
         dataSet.setDrawValues(false);
         dataSet.setDrawCircles(false);
@@ -713,7 +724,7 @@ public class GraphActivity extends AppCompatActivity{
 
     public void calculatePowerUsage(double outputLux) {
         Intent intention = getIntent();
-        Classroom classroom = (Classroom)intention.getSerializableExtra("classroomObject");
+        classroom = (Classroom)intention.getSerializableExtra("classroomObject");
         double power = calculateWattFromLux(outputLux);   //Current power consumption
         powerTotal += power;   //Getting total power, "+", this will be reduced from the "energyLeft" variable, power is CONSUMED by the lights.
 
@@ -767,7 +778,6 @@ public class GraphActivity extends AppCompatActivity{
                 Log.d("CONNECTION", "There are connection issues");
             }
         }
-       // textMagneto.setText("Verbruik op dit moment: " + String.valueOf(power) + " W" + "\n" + "Gemiddeld verbruik: " + String.valueOf(averagePowerUsage) + " W" + "\n" + "Lux op dit moment: " + String.valueOf(outputLux)/*+ "\n" + "Time passed: " + String.valueOf(timePassed)*/);
     }
 
     private JSONArray buildJSONArray() {
@@ -872,7 +882,29 @@ public class GraphActivity extends AppCompatActivity{
         toolbar = (Toolbar) v.findViewById(R.id.toolbar);
         toolbar.setTitle("Hoeveel energie in kWh hebben jullie opgewekt?");
         toolbar.setTitleTextColor(Color.WHITE);
-        AlertDialog alert = adb.create();
+        alert = adb.create();
+        alert.show();
+    }
+
+    public void viewScore(View view) {
+        View v = getLayoutInflater().inflate(R.layout.score_popup, null);
+        AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
+        adb.setView(v);
+
+        // Connect the RecyclerView to the code
+        recyclerView = (RecyclerView) v.findViewById(R.id.main_recyclerView);
+        recyclerView.setHasFixedSize(true);
+
+        // Create the layout manager and add it to the RecyclerView
+        recLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(recLayoutManager);
+
+        new LoadAllSchools().execute();
+
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        toolbar.setTitle("Tijdelijk klassement");
+        toolbar.setTitleTextColor(Color.WHITE);
+        alert = adb.create();
         alert.show();
     }
 
@@ -885,6 +917,39 @@ public class GraphActivity extends AppCompatActivity{
                 .setPositiveButton("Ja", new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int whichButton) {
+
+                        /**
+                         * Sync to SQLite dB
+                         */
+                        DatabaseHelper dbh = new DatabaseHelper(getApplicationContext());
+                        for(int i=0;i<dbh.getAllClassrooms().size();i++){
+                            Log.e("naamresgistratie: " , naamRegistratie);
+                            Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
+                            if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
+                                Log.e("energy left : " , String.valueOf(energyLeft));
+                                dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
+                                Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
+                                Log.e("Groepsnaam= ", classroom.getGroepsnaam());
+                            }
+                        }
+
+                        Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+
+                        //To implement
+                        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+
+                        if (networkInfo != null && networkInfo.isConnected()) {
+                            //Fetch data
+                            JSONArray json = buildJSONArray();
+                            String url = "http://thinkcore.be/sync/TESTPHP3.php";
+                            new SendSQLiteData().execute(url, json.toString());
+                        } else {
+                            Log.d("CONNECTION", "There are connection issues");
+                        }
+
+
+
                         onStop(); //disconnect tag sensor
                         getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
                         //Start new activity
@@ -903,9 +968,6 @@ public class GraphActivity extends AppCompatActivity{
             String text = inputValue.getText().toString();
             if (!text.equals("")) {
                 inputPower = Double.parseDouble(text);
-                Toast.makeText(getApplicationContext(), "" + inputPower + "Dit Is De Toaster Text", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Null object", Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -913,6 +975,60 @@ public class GraphActivity extends AppCompatActivity{
 
         powerTotal -= inputPower / 0.0002777;
 
+        alert.hide();
+    }
+
+    public void closePopUp(View v) {
+        alert.hide();
+    }
+
+    /**
+     * Background Async Task to Load all Schools by making HTTP Request
+     * */
+    class LoadAllSchools extends AsyncTask<String, String, String> {
+
+        /**
+         * Before starting background thread Show Progress Dialog
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        /**
+         * getting All School from url
+         */
+        protected String doInBackground(String... args) {
+            // getting JSON string from URL
+            JSONArray json = jParser.makeHttpRequest(url_all_schools, "GET", null);
+
+            Log.e("JSON", json.toString());
+
+            for(int i=0; i<json.length(); i++){
+                try {
+                    JSONObject klas = json.getJSONObject(i);
+                    Classroom insertClass = new Classroom();
+
+                    insertClass.setClassname(klas.getString("Schoolname"));
+                    insertClass.setGroepsnaam(klas.getString("Classname"));
+                    insertClass.setHighscore(klas.getString("Highscore"));
+
+                    dataSetClasses.add(insertClass);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+            return null;
+        }
+
+        protected void onPostExecute(String file_url) {
+            recAdapter = new RecyclerAdapter(dataSetClasses);
+            recyclerView.setAdapter(recAdapter);
+        }
     }
 
 }
