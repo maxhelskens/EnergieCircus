@@ -35,28 +35,36 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center">
 
-                <TextView
-                    android:text="Groep T"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:textSize="16dp"
-                    android:id="@+id/card_schoolname" />
+                    android:layout_gravity="center">
 
-                <TextView
-                    android:text="11.02"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:textSize="12dp"
-                    android:id="@+id/card_classname" />
+                    <TextView
+                        android:text="11.02"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:textSize="20dp"
+                        android:id="@+id/card_classname" />
+
+                    <TextView
+                        android:text="Groep T"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="5dp"
+                        android:textSize="20dp"
+                        android:id="@+id/card_schoolname" />
+
+                </LinearLayout>
 
                 <TextView
                     android:text="5695 punten"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
-                    android:textSize="12dp"
+                    android:textSize="20dp"
                     android:id="@+id/card_highscore" />
 
             </LinearLayout>
