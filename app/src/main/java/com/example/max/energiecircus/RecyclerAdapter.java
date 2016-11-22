@@ -43,15 +43,22 @@ public class RecyclerAdapter  extends RecyclerView.Adapter<RecyclerAdapter.ViewH
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if (position == 0 || position == 1 || position == 2) {
-            holder.schoolimage.setImageResource(R.drawable.goud);
-        }
-        else {
-            holder.schoolimage.setImageResource(R.drawable.rest);
-        }
         holder.schoolname.setText(dataSet.get(position).getGroepsnaam());
         holder.classname.setText(dataSet.get(position).getClassname());
         holder.highscore.setText(dataSet.get(position).getHighscore());
+        switch(position){
+            case 0:
+                holder.schoolimage.setImageResource(R.drawable.goud);
+                break;
+            case 1:
+                holder.schoolimage.setImageResource(R.drawable.zilver);
+                break;
+            case 2:
+                holder.schoolimage.setImageResource(R.drawable.bronze);
+                break;
+            default:
+                holder.schoolimage.setImageResource(R.drawable.rest);
+        }
     }
 
     @Override
