@@ -156,6 +156,13 @@ public class GraphActivity extends AppCompatActivity{
 
     private AlertDialog alert;
 
+    private int vermogenOpwekking;
+    private double speedinkmH = 30.0;
+    private double averagePower = 100.0;
+    private double totalEnergyGenerated = 0.0;
+    private double energyGeneratedNow;
+    private double totalInputDistance = 0.0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -759,7 +766,6 @@ public class GraphActivity extends AppCompatActivity{
                     Log.e("energy left : " , String.valueOf(energyLeft));
                     dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
                     Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
-                    Log.e("Groepsnaam= ", classroom.getGroepsnaam());
                 }
             }
 
@@ -875,15 +881,41 @@ public class GraphActivity extends AppCompatActivity{
     }
 
     public void showDistanceInput() {
-        View v = getLayoutInflater().inflate(R.layout.input_popup, null);
+        View v = getLayoutInflater().inflate(R.layout.input_popup, null); //set current view as input_popup
         AlertDialog.Builder adb = new AlertDialog.Builder(GraphActivity.this);
         adb.setView(v);
         inputValue = (EditText) v.findViewById(R.id.editText);
         toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        toolbar.setTitle("Hoeveel energie in kWh hebben jullie opgewekt?");
+        toolbar.setTitle("Wat is de totale afstand dat de fiets op dit moment heeft afgelegd?");
         toolbar.setTitleTextColor(Color.WHITE);
         alert = adb.create();
         alert.show();
+    }
+
+    //triggered by input_popup
+    public void powerInputToGraph(View v) {
+
+        /**
+         * We nemen aan dat ze aan 30km/h fietsen
+         * Dan wekken ze op dat moment gemiddeld 100W op.
+         * Als ze dan bv 1km fietsen, dan hebben ze 2 min nodig om die km te rijden.
+         * In die 2 min hebben ze 3wH opgewekt qua energie. (100w per uur opgewekt, 3W in die 2 min)
+         */
+
+        try {
+            String text = inputValue.getText().toString();
+            if (!text.equals("")) {
+                double previousTotalInputDistance = totalInputDistance;
+                totalInputDistance += Double.parseDouble(text);
+                double tijdInUur = (totalInputDistance-previousTotalInputDistance)/(speedinkmH);
+                totalEnergyGenerated = tijdInUur*averagePower;
+                Log.e("Total Energy Generated: ", String.valueOf(totalEnergyGenerated));
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        powerTotal -= totalEnergyGenerated/(0.000277);
+        alert.hide();
     }
 
     public void viewScore(View view) {
@@ -908,6 +940,7 @@ public class GraphActivity extends AppCompatActivity{
         alert.show();
     }
 
+
     public void stopGame() {
 
         new AlertDialog.Builder(this)
@@ -923,13 +956,13 @@ public class GraphActivity extends AppCompatActivity{
                          */
                         DatabaseHelper dbh = new DatabaseHelper(getApplicationContext());
                         for(int i=0;i<dbh.getAllClassrooms().size();i++){
-                            Log.e("naamresgistratie: " , naamRegistratie);
-                            Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
+//                            Log.e("naamresgistratie: " , naamRegistratie);
+//                            Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                             if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
-                                Log.e("energy left : " , String.valueOf(energyLeft));
+//                                Log.e("energy left : " , String.valueOf(energyLeft));
                                 dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
-                                Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
-                                Log.e("Groepsnaam= ", classroom.getGroepsnaam());
+//                                Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
+//                                Log.e("Groepsnaam= ", classroom.getGroepsnaam());
                             }
                         }
 
@@ -962,21 +995,7 @@ public class GraphActivity extends AppCompatActivity{
                 .setNegativeButton("Neen", null).show();
     }
 
-    public void powerInputToGraph(View v) {
-        double inputPower = 0.0;
-        try {
-            String text = inputValue.getText().toString();
-            if (!text.equals("")) {
-                inputPower = Double.parseDouble(text);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
 
-        powerTotal -= inputPower / 0.0002777;
-
-        alert.hide();
-    }
 
     public void closePopUp(View v) {
         alert.hide();
