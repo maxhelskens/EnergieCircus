@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.content.SharedPreferences.Editor;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -25,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +44,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -163,6 +166,10 @@ public class GraphActivity extends AppCompatActivity{
     private double energyGeneratedNow;
     private double totalInputDistance = 0.0;
 
+    private boolean wifi = true;
+    private NetworkInfo mWifi;
+    private ConnectivityManager connManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,6 +231,9 @@ public class GraphActivity extends AppCompatActivity{
         dataSet.setFillColor(R.color.colorAccent);
         dataSet.setFillAlpha(0);
 
+        dataSet.setColors(new int[] { R.color.colorPrimaryLight }, getApplicationContext());
+
+
         startEntries = new ArrayList<Entry>();
 
         /**
@@ -247,6 +257,86 @@ public class GraphActivity extends AppCompatActivity{
         naamRegistratie = prefs.getString("Naam", null);
         klasRegistratie = prefs.getString("Klas", null);
         aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
+
+
+        /**
+         * Check if internet is connected
+         */
+        connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (!mWifi.isConnected()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+            // set title
+            alertDialogBuilder.setTitle("Geen internetverbinding");
+
+            // set dialog message
+            alertDialogBuilder
+                    .setMessage("Als je met de wifi verbonden bent kan je jouw vooruitgang vergelijken met andere klassen en scholen. Wil je verbinding maken?" )
+                    .setCancelable(false)
+                    .setPositiveButton("Ja",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            //enable wifi
+                            startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+                            checkWifiAgain();
+                        }
+                    })
+                    .setNegativeButton("Neen",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            //TODO: Don't sync if no wifi
+                            wifi = false;
+                            ((ImageView) findViewById(R.id.trophyIcon)).setVisibility(View.INVISIBLE);
+                        }
+                    });
+
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+
+            // show it
+            alertDialog.show();
+        }
+        else {
+            wifi =true;
+        }
+    }
+
+    public void checkWifiAgain() {
+
+        if (!mWifi.isConnected()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+            // set title
+            alertDialogBuilder.setTitle("Geen internetverbinding");
+
+            // set dialog message
+            alertDialogBuilder
+                    .setMessage("Je bent nog steeds niet verbonden met de wifi. Wil je zo verder gaan?" )
+                    .setCancelable(false)
+                    .setPositiveButton("Ja",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            //enable wifi
+                            wifi = false;
+                            ((ImageView) findViewById(R.id.trophyIcon)).setVisibility(View.INVISIBLE);
+                        }
+                    })
+                    .setNegativeButton("Neen, nog eens proberen",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
+                            checkWifiAgain();
+                        }
+                    });
+
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+
+            // show it
+            alertDialog.show();
+        }
+        else {
+            wifi = true;
+        }
+
     }
 
     /**********************
@@ -296,6 +386,13 @@ public class GraphActivity extends AppCompatActivity{
             mGatt.close();
             mGatt = null;
         }
+
+        //save last energy
+        SharedPreferences SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity", 0);
+        Editor editor = SharedPreferences.edit();
+        editor.putInt("laatsteScore", (int)energyLeft);
+        editor.commit();
+
     }
 
     @Override
@@ -305,6 +402,13 @@ public class GraphActivity extends AppCompatActivity{
         }
         mGatt.close();
         mGatt = null;
+
+        //save last energy
+        SharedPreferences SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity", 0);
+        Editor editor = SharedPreferences.edit();
+        editor.putInt("laatsteScore", (int)energyLeft);
+        editor.commit();
+
         super.onDestroy();
     }
 
@@ -716,7 +820,16 @@ public class GraphActivity extends AppCompatActivity{
      *************************/
 
     public void getLuxValue(BluetoothGattCharacteristic c) {
-        amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
+        SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
+        int laatsteScore = prefs.getInt("laatsteScore", 0);
+        if(laatsteScore == 0) {
+            amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
+        }
+        else {
+            amountEnergy = (double) laatsteScore;
+        }
+        Log.e(""+ laatsteScore, "" + amountEnergy);
+
         Log.e("test", "GetLuxVALUEMETHOD");   //Get Light intensity
         byte[] value = c.getValue();
         int mantissa;
@@ -763,25 +876,23 @@ public class GraphActivity extends AppCompatActivity{
                 Log.e("naamresgistratie: " , naamRegistratie);
                 Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                 if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
-                    Log.e("energy left : " , String.valueOf(energyLeft));
                     dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
-                    Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
                 }
             }
 
-            Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+            if (wifi) {
+                //To implement
+                ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
-            //To implement
-            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-
-            if (networkInfo != null && networkInfo.isConnected()) {
-                //Fetch data
-                JSONArray json = buildJSONArray();
-                String url = "http://thinkcore.be/sync/TESTPHP3.php";
-                new SendSQLiteData().execute(url, json.toString());
-            } else {
-                Log.d("CONNECTION", "There are connection issues");
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    //Fetch data
+                    JSONArray json = buildJSONArray();
+                    String url = "http://thinkcore.be/sync/TESTPHP3.php";
+                    new SendSQLiteData().execute(url, json.toString());
+                } else {
+                    Log.d("CONNECTION", "There are connection issues");
+                }
             }
         }
     }
@@ -966,30 +1077,32 @@ public class GraphActivity extends AppCompatActivity{
                             }
                         }
 
-                        Log.e("Energy left: ", String.valueOf(classroom.getHighscore()));
+                        if(wifi) {
+                            //To implement
+                            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
-                        //To implement
-                        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-
-                        if (networkInfo != null && networkInfo.isConnected()) {
-                            //Fetch data
-                            JSONArray json = buildJSONArray();
-                            String url = "http://thinkcore.be/sync/TESTPHP3.php";
-                            new SendSQLiteData().execute(url, json.toString());
-                        } else {
-                            Log.d("CONNECTION", "There are connection issues");
+                            if (networkInfo != null && networkInfo.isConnected()) {
+                                //Fetch data
+                                JSONArray json = buildJSONArray();
+                                String url = "http://thinkcore.be/sync/TESTPHP3.php";
+                                new SendSQLiteData().execute(url, json.toString());
+                            } else {
+                                Log.d("CONNECTION", "There are connection issues");
+                            }
                         }
-
-
 
                         onStop(); //disconnect tag sensor
                         getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
                         //Start new activity
-                        Intent showActivity = new Intent(GraphActivity.this, EndResultActivity.class);
-                        startActivity(showActivity);
-                        //syncen met SQLite
-                        //naar dBs
+
+                        if(wifi) {
+                            Intent showActivity = new Intent(GraphActivity.this, EndResultActivity.class);
+                            startActivity(showActivity);
+                        }
+                        else {
+                            //TODO: Stuur naar een resultaatpagina voor hem alleen. Geen vergelijking dus want er is geen wifi.
+                        }
                     }
                 })
                 .setNegativeButton("Neen", null).show();
@@ -1012,6 +1125,7 @@ public class GraphActivity extends AppCompatActivity{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            dataSetClasses.clear();
 
         }
 

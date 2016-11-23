@@ -4,15 +4,13 @@ package com.example.max.energiecircus;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.io.Serializable;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -81,6 +79,7 @@ public class MainActivity extends AppCompatActivity{
             editor.putString("Naam", nameTxt);
             editor.putString("Klas", klasTxt);
             editor.putInt("AantalLampen", aantalLampenInt);
+            editor.putInt("laatsteScore", 0);
             editor.commit();
 
         /*Lezen van sharedPreferences*/
