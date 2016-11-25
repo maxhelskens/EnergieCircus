@@ -169,6 +169,7 @@ public class GraphActivity extends AppCompatActivity{
     private boolean wifi = true;
     private NetworkInfo mWifi;
     private ConnectivityManager connManager;
+    private double previousTotalInputDistance = 0.0;
 
 
     @Override
@@ -284,7 +285,6 @@ public class GraphActivity extends AppCompatActivity{
                     })
                     .setNegativeButton("Neen",new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog,int id) {
-                            //TODO: Don't sync if no wifi
                             wifi = false;
                             ((ImageView) findViewById(R.id.trophyIcon)).setVisibility(View.INVISIBLE);
                         }
@@ -1016,11 +1016,11 @@ public class GraphActivity extends AppCompatActivity{
         try {
             String text = inputValue.getText().toString();
             if (!text.equals("")) {
-                double previousTotalInputDistance = totalInputDistance;
-                totalInputDistance += Double.parseDouble(text);
+                previousTotalInputDistance = totalInputDistance;
+                totalInputDistance = Double.parseDouble(text);
                 double tijdInUur = (totalInputDistance-previousTotalInputDistance)/(speedinkmH);
                 totalEnergyGenerated = tijdInUur*averagePower;
-                Log.e("Total Energy Generated: ", String.valueOf(totalEnergyGenerated));
+                Log.e("Total Energy Generated:", String.valueOf(totalEnergyGenerated));
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -1136,7 +1136,7 @@ public class GraphActivity extends AppCompatActivity{
             // getting JSON string from URL
             JSONArray json = jParser.makeHttpRequest(url_all_schools, "GET", null);
 
-            Log.e("JSON", json.toString());
+            //Log.e("JSON", json.toString());
 
             for(int i=0; i<json.length(); i++){
                 try {
