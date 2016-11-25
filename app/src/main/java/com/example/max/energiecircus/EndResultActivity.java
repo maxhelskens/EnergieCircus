@@ -29,7 +29,6 @@ public class EndResultActivity extends AppCompatActivity {
 
     // products JSONArray
     JSONArray schools = null;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

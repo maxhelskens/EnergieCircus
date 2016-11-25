@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity{
     SharedPreferences SharedPreferences;
     EditText name;
     EditText klas;
-    EditText aantalLampen;
+    EditText aantalLeerlingen;
     Button registratieKnop;
     Editor editor;
 
@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity{
         SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
         String naamRegistratie = prefs.getString("Naam", null);
         String klasRegistratie = prefs.getString("Klas", null);
-        int aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
-        if (naamRegistratie != null && klasRegistratie != null && aantalLampenRegistratie != 0) {
+        int aantalLeerlingenRegistratie = prefs.getInt("AantalLampen", 0);
+        if (naamRegistratie != null && klasRegistratie != null && aantalLeerlingenRegistratie != 0) {
             Intent showActivity = new Intent(this, GraphActivity.class);
             startActivity(showActivity);
         }
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity{
         //declare variables
         name = (EditText) findViewById(R.id.editText_name);
         klas = (EditText) findViewById(R.id.editText_klas);
-        aantalLampen = (EditText) findViewById(R.id.editText_aantalLampen);
+        aantalLeerlingen = (EditText) findViewById(R.id.editText_aantalLeerlingen);
         registratieKnop = (Button) findViewById(R.id.registratie);
     }
 
@@ -52,11 +52,11 @@ public class MainActivity extends AppCompatActivity{
 
         String nameTxt = name.getText().toString();
         String klasTxt = klas.getText().toString();
-        int aantalLampenInt;
-        if (aantalLampen.getText().toString().matches("")) {
-            aantalLampenInt = 0;
+        int aantalLeerlingenTxt;
+        if (aantalLeerlingen.getText().toString().matches("")) {
+            aantalLeerlingenTxt = 0;
         } else {
-            aantalLampenInt = Integer.parseInt(aantalLampen.getText().toString());
+            aantalLeerlingenTxt = Integer.parseInt(aantalLeerlingen.getText().toString());
 
         }
         boolean inputOk = true;
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity{
         } else if (klas.getText().length() <= 0) {
             Toast.makeText(MainActivity.this, "Kies een klas", Toast.LENGTH_SHORT).show();
             inputOk = false;
-        } else if (aantalLampen.getText().length() <= 0) {
+        } else if (aantalLeerlingen.getText().length() <= 0) {
             Toast.makeText(MainActivity.this, "Hoeveel lampen telt je klas?", Toast.LENGTH_SHORT).show();
             inputOk = false;
         }
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity{
         /*Nodig voor SharedPreferences*/
             editor.putString("Naam", nameTxt);
             editor.putString("Klas", klasTxt);
-            editor.putInt("AantalLampen", aantalLampenInt);
+            editor.putInt("AantalLeerlingen", aantalLeerlingenTxt);
             editor.putInt("laatsteScore", 0);
             editor.commit();
 
@@ -86,11 +86,11 @@ public class MainActivity extends AppCompatActivity{
             SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
             String naamRegistratie = prefs.getString("Naam", null);
             String klasRegistratie = prefs.getString("Klas", null);
-            int aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
-            if (naamRegistratie != null && klasRegistratie != null && aantalLampenRegistratie != 0) {
-                Log.e("naam", naamRegistratie);
-                Log.e("klas", klasRegistratie);
-                Log.e("aantal lasmpen", String.valueOf(aantalLampenRegistratie));
+            int aantalLeerlingenRegistratie = prefs.getInt("AantalLeerlingen", 0);
+            if (naamRegistratie != null && klasRegistratie != null && aantalLeerlingenRegistratie != 0) {
+                Log.e("naam: ", naamRegistratie);
+                Log.e("klas: ", klasRegistratie);
+                Log.e("aantal leerlingen: ", String.valueOf(aantalLeerlingenRegistratie));
             }
 
             DatabaseHelper dbh = new DatabaseHelper(this);

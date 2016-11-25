@@ -149,13 +149,12 @@ public class GraphActivity extends AppCompatActivity{
     private double powerTotal = 0;
     private double energyLeft;
     private double averagePowerUsage;
-    private double minLuxValue;
-    private double powerUsageLamp;
+    private double powerPerStudent = 280.0; //10Wh per student. 30Wh per lamp. 3 Students per lamp
     private EditText inputValue;
 
     private String naamRegistratie;
     private String klasRegistratie;
-    private int aantalLampenRegistratie;
+    private int aantalLeerlingenRegistratie;
 
     private AlertDialog alert;
 
@@ -170,6 +169,7 @@ public class GraphActivity extends AppCompatActivity{
     private NetworkInfo mWifi;
     private ConnectivityManager connManager;
     private double previousTotalInputDistance = 0.0;
+    private double minLuxValue = 30.0;
 
 
     @Override
@@ -257,7 +257,7 @@ public class GraphActivity extends AppCompatActivity{
         SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
         naamRegistratie = prefs.getString("Naam", null);
         klasRegistratie = prefs.getString("Klas", null);
-        aantalLampenRegistratie = prefs.getInt("AantalLampen", 0);
+        aantalLeerlingenRegistratie = prefs.getInt("AantalLeerlingen", 0);
 
 
         /**
@@ -388,9 +388,11 @@ public class GraphActivity extends AppCompatActivity{
         }
 
         //save last energy
+
+        double normalizedValuePerStudent = energyLeft/aantalLeerlingenRegistratie;
         SharedPreferences SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity", 0);
         Editor editor = SharedPreferences.edit();
-        editor.putInt("laatsteScore", (int)energyLeft);
+        editor.putInt("laatsteScore", (int)normalizedValuePerStudent);
         editor.commit();
 
     }
@@ -823,14 +825,14 @@ public class GraphActivity extends AppCompatActivity{
         SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
         int laatsteScore = prefs.getInt("laatsteScore", 0);
         if(laatsteScore == 0) {
-            amountEnergy = 5000f; //Initialize amount of starting energy in watts. (500000 = 500kW)
+            amountEnergy = aantalLeerlingenRegistratie * powerPerStudent; //Initialize amount of starting energy in watts. Each student: 10Wh
         }
         else {
             amountEnergy = (double) laatsteScore;
         }
         Log.e(""+ laatsteScore, "" + amountEnergy);
 
-        Log.e("test", "GetLuxVALUEMETHOD");   //Get Light intensity
+        //Log.e("test", "GetLuxVALUEMETHOD");   //Get Light intensity
         byte[] value = c.getValue();
         int mantissa;
         int exponent;
@@ -897,6 +899,36 @@ public class GraphActivity extends AppCompatActivity{
         }
     }
 
+    /*********************************************************************
+     * Get Watt from lux.
+     * Fluorescent lamp: 60lm/W
+     * Formula P(W) = Ev(lx) × A(m2) / η(lm/W)
+     * 60 because average TL-Lamp has a 60 efficiency.
+     * Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm
+     *********************************************************************/
+
+    public double calculateWattFromLux(double outputValueOfLux) {
+        double power = 0.0;
+        double powerPerLamp = 30.0; //http://www.t5-adapter.nl/Webwinkel-Page-148527/Informatie.html#.WDMKQ9XhCUk. TL-5.
+        double aantalLampen = Math.round(aantalLeerlingenRegistratie/3.0); //3 students per lamp
+        if (outputValueOfLux > minLuxValue)
+
+        /**Counting power usage of lamps, using lowest energy wattage for tl-5 lamps; depending on the amount of lamps in the classroom.
+         * This is expressed in Wh.
+         * Power for one lamp: 30Wh -> This is then reduced to Ws
+         * 1 lamp is equivalent to 3 students
+         */
+            power = Math.round(powerPerLamp * aantalLampen);
+
+        return power;
+    }
+
+    private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
+        Integer lowerByte = (int) c[offset] & 0xFF;
+        Integer upperByte = (int) c[offset + 1] & 0xFF;
+        return (upperByte << 8) + lowerByte;
+    }
+
     private JSONArray buildJSONArray() {
         DatabaseHelper dbh = new DatabaseHelper(this);
         ArrayList<Classroom> list = dbh.getAllClassrooms();
@@ -940,7 +972,7 @@ public class GraphActivity extends AppCompatActivity{
                 writer.close();
 
                 BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String result = "";
+//                String result = "";
                 String echo = "";
                 while((echo = br.readLine()) != null){
                     Log.d("RESULT", echo);
@@ -961,30 +993,6 @@ public class GraphActivity extends AppCompatActivity{
             }
             return null;
         }
-    }
-
-
-    /*********************************************************************
-     * Get Watt from lux.
-     * Fluorescent lamp: 60lm/W
-     * Formula P(W) = Ev(lx) × A(m2) / η(lm/W)
-     * 60 because average TL-Lamp has a 60 efficiency.
-     * Source: http://www.rapidtables.com/calc/light/lux-to-watt-calculator.htm
-     *********************************************************************/
-
-    public double calculateWattFromLux(double outputValueOfLux) {
-        double power = 0.0;
-        minLuxValue = 30.0; //Can be changed. Hardcoded to 200 lux. (0-200 Off <-> 200-inf On)
-        powerUsageLamp = 28.0; //http://www.t5-adapter.nl/Webwinkel-Page-148527/Informatie.html#.WDMKQ9XhCUk. TL-5.
-        if (outputValueOfLux > minLuxValue)
-            power = (double) aantalLampenRegistratie * powerUsageLamp; //Counting power usage of lamps, using lowest energy wattage for tl-5 lamps; depending on the amount of lamps in the classroom.
-        return power;
-    }
-
-    private static Integer shortUnsignedAtOffset(byte[] c, int offset) {
-        Integer lowerByte = (int) c[offset] & 0xFF;
-        Integer upperByte = (int) c[offset + 1] & 0xFF;
-        return (upperByte << 8) + lowerByte;
     }
 
     public void goToPlayground(View v) {
