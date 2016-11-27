@@ -65,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return false;
         }
     }
-    public boolean updateHighscore(Classroom classroom, String groepsNaam, String highScore){
+    public boolean updateHighscore(String groepsNaam, String highScore){
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();

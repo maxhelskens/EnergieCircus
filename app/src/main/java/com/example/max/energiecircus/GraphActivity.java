@@ -147,7 +147,7 @@ public class GraphActivity extends AppCompatActivity{
     private double outputLux;
     private double amountEnergy;
     private double powerTotal = 0;
-    private double energyLeft;
+    public double energyLeft;
     private double averagePowerUsage;
     private double powerPerStudent = 280.0; //10Wh per student. 30Wh per lamp. 3 Students per lamp
     private EditText inputValue;
@@ -160,7 +160,7 @@ public class GraphActivity extends AppCompatActivity{
 
     private int vermogenOpwekking;
     private double speedinkmH = 30.0;
-    private double averagePower = 100.0;
+    private double averagePower = 200.0;
     private double totalEnergyGenerated = 0.0;
     private double energyGeneratedNow;
     private double totalInputDistance = 0.0;
@@ -170,6 +170,7 @@ public class GraphActivity extends AppCompatActivity{
     private ConnectivityManager connManager;
     private double previousTotalInputDistance = 0.0;
     private double minLuxValue = 30.0;
+    private double normalizedValuePerStudent;
 
 
     @Override
@@ -301,6 +302,12 @@ public class GraphActivity extends AppCompatActivity{
         }
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        //Can't press back button
+    }
+
     public void checkWifiAgain() {
 
         if (!mWifi.isConnected()) {
@@ -389,7 +396,7 @@ public class GraphActivity extends AppCompatActivity{
 
         //save last energy
 
-        double normalizedValuePerStudent = energyLeft/aantalLeerlingenRegistratie;
+        normalizedValuePerStudent = energyLeft/aantalLeerlingenRegistratie;
         SharedPreferences SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity", 0);
         Editor editor = SharedPreferences.edit();
         editor.putInt("laatsteScore", (int)normalizedValuePerStudent);
@@ -845,9 +852,7 @@ public class GraphActivity extends AppCompatActivity{
     }
 
     public void calculatePowerUsage(double outputLux) {
-        Intent intention = getIntent();
-        classroom = (Classroom)intention.getSerializableExtra("classroomObject");
-        double power = calculateWattFromLux(outputLux);   //Current power consumption
+       double power = calculateWattFromLux(outputLux);   //Current power consumption
         powerTotal += power;   //Getting total power, "+", this will be reduced from the "energyLeft" variable, power is CONSUMED by the lights.
 
         if ((double) i != 0.0) {
@@ -878,7 +883,7 @@ public class GraphActivity extends AppCompatActivity{
                 Log.e("naamresgistratie: " , naamRegistratie);
                 Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                 if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
-                    dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
+                    dbh.updateHighscore(naamRegistratie, String.valueOf(energyLeft));
                 }
             }
 
@@ -1079,7 +1084,7 @@ public class GraphActivity extends AppCompatActivity{
 //                            Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                             if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
 //                                Log.e("energy left : " , String.valueOf(energyLeft));
-                                dbh.updateHighscore(classroom, naamRegistratie, String.valueOf(energyLeft));
+                                dbh.updateHighscore(naamRegistratie, String.valueOf(energyLeft));
 //                                Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
 //                                Log.e("Groepsnaam= ", classroom.getGroepsnaam());
                             }
@@ -1109,7 +1114,11 @@ public class GraphActivity extends AppCompatActivity{
                             startActivity(showActivity);
                         }
                         else {
-                            //TODO: Stuur naar een resultaatpagina voor hem alleen. Geen vergelijking dus want er is geen wifi.
+                            //new NoInternetEndResult(energyLeft);
+                            Log.e("Energy Left Class A", String.valueOf(normalizedValuePerStudent));
+                            Intent showActivity = new Intent(GraphActivity.this, NoInternetEndResult.class);
+                            showActivity.putExtra("ENDRESULT", (double) Math.round(normalizedValuePerStudent));
+                            startActivity(showActivity);
                         }
                     }
                 })
