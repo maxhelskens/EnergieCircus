@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity{
             editor.putInt("AantalLeerlingen", aantalLeerlingenTxt);
             editor.putInt("AantalExtraPunten", aantalExtraPuntenKwisTxt);
             editor.putInt("laatsteScore", 0);
+            editor.putInt("laatsteKmStand", 0);
             editor.commit();
 
         /*Lezen van sharedPreferences*/

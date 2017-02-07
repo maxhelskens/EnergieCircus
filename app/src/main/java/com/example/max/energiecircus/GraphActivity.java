@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,6 +46,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +69,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.lang.Math.pow;
@@ -262,6 +266,12 @@ public class GraphActivity extends AppCompatActivity{
         aantalLeerlingenRegistratie = prefs.getInt("AantalLeerlingen", 0);
         aantalExtraPuntenKwis = prefs.getInt("AantalExtraPunten",0);
 
+
+        Log.e("START", "" + prefs.getInt("laatsteKmStand", 0));
+
+        totalInputDistance = prefs.getInt("laatsteKmStand", 0);
+
+
         /**
          * Check if internet is connected
          */
@@ -402,6 +412,7 @@ public class GraphActivity extends AppCompatActivity{
         Editor editor = SharedPreferences.edit();
         editor.putInt("laatsteScore", (int)normalizedValuePerStudent);
         editor.putInt("laatsteEnergie", (int)energyLeft);
+        editor.putInt("laatsteKmStand", (int)totalInputDistance);
         editor.commit();
 
         Log.e("STOP", "" + energyLeft);
@@ -421,6 +432,7 @@ public class GraphActivity extends AppCompatActivity{
         Editor editor = SharedPreferences.edit();
         editor.putInt("laatsteScore", (int)energyLeft);
         editor.putInt("laatsteEnergie", (int)energyLeft);
+        editor.putInt("laatsteKmStand", (int)totalInputDistance);
         editor.commit();
 
         Log.e("STOP", "" + energyLeft);
@@ -875,7 +887,7 @@ public class GraphActivity extends AppCompatActivity{
             dataSet.removeEntry(0);
         }
 
-        startDataSet.addEntry(new Entry((float) i, (float) amountEnergy)); //Adding entry: using total power consumption.
+        startDataSet.addEntry(new Entry((float) i, (float) (aantalLeerlingenRegistratie * powerPerStudent + (aantalExtraPuntenKwis*50.0)))); //Adding entry: using total power consumption.
         if (startDataSet.getEntryCount() > 400) {
             startDataSet.removeEntry(0);
         }
@@ -1044,11 +1056,29 @@ public class GraphActivity extends AppCompatActivity{
         try {
             String text = inputValue.getText().toString();
             if (!text.equals("")) {
-                previousTotalInputDistance = totalInputDistance;
-                totalInputDistance = Double.parseDouble(text);
-                double tijdInUur = (totalInputDistance-previousTotalInputDistance)/(speedinkmH);
-                totalEnergyGenerated = tijdInUur*averagePower;
-                Log.e("Total Energy Generated:", String.valueOf(totalEnergyGenerated));
+                if (Double.parseDouble(text) > totalInputDistance) {
+                    previousTotalInputDistance = totalInputDistance;
+                    totalInputDistance = Double.parseDouble(text);
+
+                    double tijdInUur = (totalInputDistance-previousTotalInputDistance)/(speedinkmH);
+                    totalEnergyGenerated = tijdInUur*averagePower;
+                    Log.e("Total Energy Generated:", String.valueOf(totalEnergyGenerated));
+                }
+                else {
+                    totalEnergyGenerated = 0;
+
+                    LinearLayout coordinatorLayout = (LinearLayout) findViewById(R.id
+                            .linearLayout);
+                    Snackbar snackbar = Snackbar
+                            .make(coordinatorLayout, "Dit getal is kleiner dan de vorige ingave. Geef de totale km stand in", Snackbar.LENGTH_LONG);
+
+                    View snackbarView = snackbar.getView();
+                    snackbarView.setBackgroundColor(Color.DKGRAY);
+                    TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+                    textView.setTextColor(Color.WHITE);
+                    snackbar.show();
+                }
+
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -1120,8 +1150,17 @@ public class GraphActivity extends AppCompatActivity{
                             }
                         }
 
-                        onStop(); //disconnect tag sensor
+                        //onStop(); //disconnect tag sensor
+
+                        if (mGatt != null) {
+                            mGatt.close();
+                            mGatt = null;
+                        }
+
                         getApplicationContext().getSharedPreferences("MainActivity", 0).edit().clear().commit(); //clear preferences
+
+                        Log.e("START", "OK");
+                        Log.e("START", "" + getApplicationContext().getSharedPreferences("MainActivity", 0).getInt("laatsteKmStand", 0));
                         //Start new activity
 
                         if(wifi) {
