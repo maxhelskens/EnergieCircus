@@ -401,7 +401,10 @@ public class GraphActivity extends AppCompatActivity{
         SharedPreferences SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity", 0);
         Editor editor = SharedPreferences.edit();
         editor.putInt("laatsteScore", (int)normalizedValuePerStudent);
+        editor.putInt("laatsteEnergie", (int)energyLeft);
         editor.commit();
+
+        Log.e("STOP", "" + energyLeft);
 
     }
 
@@ -417,7 +420,10 @@ public class GraphActivity extends AppCompatActivity{
         SharedPreferences SharedPreferences = getApplicationContext().getSharedPreferences("MainActivity", 0);
         Editor editor = SharedPreferences.edit();
         editor.putInt("laatsteScore", (int)energyLeft);
+        editor.putInt("laatsteEnergie", (int)energyLeft);
         editor.commit();
+
+        Log.e("STOP", "" + energyLeft);
 
         super.onDestroy();
     }
@@ -836,7 +842,7 @@ public class GraphActivity extends AppCompatActivity{
             amountEnergy = (aantalLeerlingenRegistratie * powerPerStudent + (aantalExtraPuntenKwis*50.0)); //Initialize amount of starting energy in watts. Each student: 10Wh
         }
         else {
-            amountEnergy = (double) laatsteScore;
+            amountEnergy = (double) prefs.getInt("laatsteEnergie", 0);;
         }
         Log.e(""+ laatsteScore, "" + amountEnergy);
 
@@ -865,7 +871,14 @@ public class GraphActivity extends AppCompatActivity{
         startDataSet.setFillColor(R.color.colorPrimaryLight);
         energyLeft = amountEnergy - (powerTotal * 0.0002777);
         dataSet.addEntry(new Entry((float) i, (float) energyLeft));
+        if (dataSet.getEntryCount() > 400) {
+            dataSet.removeEntry(0);
+        }
+
         startDataSet.addEntry(new Entry((float) i, (float) amountEnergy)); //Adding entry: using total power consumption.
+        if (startDataSet.getEntryCount() > 400) {
+            startDataSet.removeEntry(0);
+        }
         lineData.notifyDataChanged(); // let the data know a dataSet changed
         chart.notifyDataSetChanged(); // let the chart know its data changed
         chart.invalidate(); // refresh
