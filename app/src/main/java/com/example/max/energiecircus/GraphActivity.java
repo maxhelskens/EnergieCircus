@@ -177,6 +177,8 @@ public class GraphActivity extends AppCompatActivity{
     private double minLuxValue = 90.0;
     private double normalizedValuePerStudent;
 
+    ImageView steps;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -212,6 +214,16 @@ public class GraphActivity extends AppCompatActivity{
         /***************
          *    Layout   *
          ***************/
+        steps = (ImageView) findViewById(R.id.stappenplan);
+
+        steps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                steps.setVisibility(View.INVISIBLE);
+            }
+        });
+
+
         Button stopButton = (Button) findViewById(R.id.stopGame);
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,10 +283,16 @@ public class GraphActivity extends AppCompatActivity{
 
         totalInputDistance = prefs.getInt("laatsteKmStand", 0);
 
+    }
 
-        /**
-         * Check if internet is connected
-         */
+    @Override
+    public void onBackPressed()
+    {
+        //Can't press back button
+    }
+
+    public void checkWifiAgain() {
+
         connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
@@ -292,7 +310,7 @@ public class GraphActivity extends AppCompatActivity{
                         public void onClick(DialogInterface dialog,int id) {
                             //enable wifi
                             startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
-                            checkWifiAgain();
+                            //checkWifiAgain();
                         }
                     })
                     .setNegativeButton("Neen",new DialogInterface.OnClickListener() {
@@ -302,48 +320,6 @@ public class GraphActivity extends AppCompatActivity{
                         }
                     });
 
-            // create alert dialog
-            AlertDialog alertDialog = alertDialogBuilder.create();
-
-            // show it
-            alertDialog.show();
-        }
-        else {
-            wifi =true;
-        }
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        //Can't press back button
-    }
-
-    public void checkWifiAgain() {
-
-        if (!mWifi.isConnected()) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-            // set title
-            alertDialogBuilder.setTitle("Geen internetverbinding");
-
-            // set dialog message
-            alertDialogBuilder
-                    .setMessage("Je bent nog steeds niet verbonden met de wifi. Wil je zo verder gaan?" )
-                    .setCancelable(false)
-                    .setPositiveButton("Ja",new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
-                            //enable wifi
-                            wifi = false;
-                            ((ImageView) findViewById(R.id.trophyIcon)).setVisibility(View.INVISIBLE);
-                        }
-                    })
-                    .setNegativeButton("Neen, nog eens proberen",new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
-                            startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
-                            checkWifiAgain();
-                        }
-                    });
 
             // create alert dialog
             AlertDialog alertDialog = alertDialogBuilder.create();
@@ -362,6 +338,13 @@ public class GraphActivity extends AppCompatActivity{
      **********************/
     @Override
     protected void onResume() {
+
+        Log.e("RESUME", "RESUME");
+        checkWifiAgain();
+
+        steps.setVisibility(View.VISIBLE);
+
+
         DatabaseHelper dbh = new DatabaseHelper(this);
         super.onResume();
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
@@ -481,6 +464,9 @@ public class GraphActivity extends AppCompatActivity{
                 /*Obtain the discovered device to connect with*/
                 BluetoothDevice device = mDevices.get(item.getItemId());
                 Log.i(TAG, "Connecting to " + device.getName());
+
+                steps.setVisibility(View.INVISIBLE);
+
                 /*
                  * Make a connection with the device
                  */
@@ -1169,9 +1155,9 @@ public class GraphActivity extends AppCompatActivity{
                         }
                         else {
                             //new NoInternetEndResult(energyLeft);
-                            Log.e("Energy Left Class A", String.valueOf(normalizedValuePerStudent));
+                            Log.e("Energy Left Class A", String.valueOf(energyLeft/aantalLeerlingenRegistratie));
                             Intent showActivity = new Intent(GraphActivity.this, NoInternetEndResult.class);
-                            showActivity.putExtra("ENDRESULT", (double) Math.round(normalizedValuePerStudent));
+                            showActivity.putExtra("ENDRESULT", (double) Math.round(energyLeft/aantalLeerlingenRegistratie));
                             startActivity(showActivity);
                         }
                     }
