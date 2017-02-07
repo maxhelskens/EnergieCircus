@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity{
     EditText aantalLeerlingen;
     Button registratieKnop;
     Editor editor;
+    EditText extraPuntenKwis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity{
         klas = (EditText) findViewById(R.id.editText_klas);
         aantalLeerlingen = (EditText) findViewById(R.id.editText_aantalLeerlingen);
         registratieKnop = (Button) findViewById(R.id.registratie);
+        extraPuntenKwis = (EditText) findViewById(R.id.editText_aantalPuntenKwis);
     }
 
     public void registreren(View v) {
@@ -53,10 +55,19 @@ public class MainActivity extends AppCompatActivity{
         String nameTxt = name.getText().toString();
         String klasTxt = klas.getText().toString();
         int aantalLeerlingenTxt;
+        int aantalExtraPuntenKwisTxt;
+
         if (aantalLeerlingen.getText().toString().matches("")) {
             aantalLeerlingenTxt = 0;
         } else {
             aantalLeerlingenTxt = Integer.parseInt(aantalLeerlingen.getText().toString());
+
+        }
+
+        if (extraPuntenKwis.getText().toString().matches("")) {
+            aantalExtraPuntenKwisTxt = 0;
+        } else {
+            aantalExtraPuntenKwisTxt = Integer.parseInt(extraPuntenKwis.getText().toString());
 
         }
         boolean inputOk = true;
@@ -79,6 +90,7 @@ public class MainActivity extends AppCompatActivity{
             editor.putString("Naam", nameTxt);
             editor.putString("Klas", klasTxt);
             editor.putInt("AantalLeerlingen", aantalLeerlingenTxt);
+            editor.putInt("AantalExtraPunten", aantalExtraPuntenKwisTxt);
             editor.putInt("laatsteScore", 0);
             editor.commit();
 
@@ -87,6 +99,7 @@ public class MainActivity extends AppCompatActivity{
             String naamRegistratie = prefs.getString("Naam", null);
             String klasRegistratie = prefs.getString("Klas", null);
             int aantalLeerlingenRegistratie = prefs.getInt("AantalLeerlingen", 0);
+
             if (naamRegistratie != null && klasRegistratie != null && aantalLeerlingenRegistratie != 0) {
                 Log.e("naam: ", naamRegistratie);
                 Log.e("klas: ", klasRegistratie);

@@ -43,7 +43,7 @@ public class NoInternetEndResult extends AppCompatActivity {
                 .setRotationSpeed(120)
                 .setFadeOut(2000)
                 .addModifier(new ScaleModifier(0f, 1.5f, 0, 1500))
-                .oneShot(findViewById(R.id.myImageViewText), 20);//Hier vervangt ge de R.id.medal door de afbeelding waar ge uw sterren uit wilt laten komen
+                .oneShot(findViewById(R.id.myImageView), 20);//Hier vervangt ge de R.id.medal door de afbeelding waar ge uw sterren uit wilt laten komen
 
     }
 

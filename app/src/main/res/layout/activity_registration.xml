@@ -35,7 +35,7 @@
 
     <TextView
         android:id="@+id/klas"
-        android:text="Class"
+        android:text="Klas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/editText_name"
@@ -80,6 +80,29 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/aantalPuntenKwis"
+        android:text="Hoeveel punten werden er tijdens de kwis verdiend?"
+        android:layout_below="@+id/editText_aantalLeerlingen"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
+        />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText_aantalPuntenKwis"
+        android:layout_below="@+id/aantalPuntenKwis"
+        android:inputType="number"
+        android:ems="10"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"/>
 
     <Button
         android:id="@+id/registratie"
@@ -87,7 +110,7 @@
         android:text="Start!"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText_aantalLeerlingen"
+        android:layout_below="@+id/editText_aantalPuntenKwis"
         android:layout_alignParentStart="true"
         android:background="@color/colorPrimaryDark"
         android:textColor="@color/textColorPrimary"
@@ -97,6 +120,4 @@
 
 
 
-    >
-
-</RelativeLayout>
+    </RelativeLayout>

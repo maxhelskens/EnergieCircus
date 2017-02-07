@@ -155,6 +155,7 @@ public class GraphActivity extends AppCompatActivity{
     private String naamRegistratie;
     private String klasRegistratie;
     private int aantalLeerlingenRegistratie;
+    private int aantalExtraPuntenKwis;
 
     private AlertDialog alert;
 
@@ -169,7 +170,7 @@ public class GraphActivity extends AppCompatActivity{
     private NetworkInfo mWifi;
     private ConnectivityManager connManager;
     private double previousTotalInputDistance = 0.0;
-    private double minLuxValue = 30.0;
+    private double minLuxValue = 90.0;
     private double normalizedValuePerStudent;
 
 
@@ -259,7 +260,7 @@ public class GraphActivity extends AppCompatActivity{
         naamRegistratie = prefs.getString("Naam", null);
         klasRegistratie = prefs.getString("Klas", null);
         aantalLeerlingenRegistratie = prefs.getInt("AantalLeerlingen", 0);
-
+        aantalExtraPuntenKwis = prefs.getInt("AantalExtraPunten",0);
 
         /**
          * Check if internet is connected
@@ -832,7 +833,7 @@ public class GraphActivity extends AppCompatActivity{
         SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
         int laatsteScore = prefs.getInt("laatsteScore", 0);
         if(laatsteScore == 0) {
-            amountEnergy = aantalLeerlingenRegistratie * powerPerStudent; //Initialize amount of starting energy in watts. Each student: 10Wh
+            amountEnergy = (aantalLeerlingenRegistratie * powerPerStudent + (aantalExtraPuntenKwis*50.0)); //Initialize amount of starting energy in watts. Each student: 10Wh
         }
         else {
             amountEnergy = (double) laatsteScore;
@@ -853,6 +854,7 @@ public class GraphActivity extends AppCompatActivity{
 
     public void calculatePowerUsage(double outputLux) {
        double power = calculateWattFromLux(outputLux);   //Current power consumption
+        Log.e("Lux Value: " , String.valueOf(outputLux));
         powerTotal += power;   //Getting total power, "+", this will be reduced from the "energyLeft" variable, power is CONSUMED by the lights.
 
         if ((double) i != 0.0) {
@@ -1010,7 +1012,7 @@ public class GraphActivity extends AppCompatActivity{
         adb.setView(v);
         inputValue = (EditText) v.findViewById(R.id.editText);
         toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        toolbar.setTitle("Wat is de totale afstand dat de fiets op dit moment heeft afgelegd?");
+        toolbar.setTitle("Totale afstand fiets? (in km)");
         toolbar.setTitleTextColor(Color.WHITE);
         alert = adb.create();
         alert.show();
