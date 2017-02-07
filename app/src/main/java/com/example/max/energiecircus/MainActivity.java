@@ -34,7 +34,8 @@ public class MainActivity extends AppCompatActivity{
         SharedPreferences prefs = getSharedPreferences("MainActivity", 0);
         String naamRegistratie = prefs.getString("Naam", null);
         String klasRegistratie = prefs.getString("Klas", null);
-        int aantalLeerlingenRegistratie = prefs.getInt("AantalLampen", 0);
+        int aantalLeerlingenRegistratie = prefs.getInt("AantalLeerlingen", 0);
+        Log.e("Shared Prefs", naamRegistratie + " " + klasRegistratie + " " + aantalLeerlingenRegistratie);
         if (naamRegistratie != null && klasRegistratie != null && aantalLeerlingenRegistratie != 0) {
             Intent showActivity = new Intent(this, GraphActivity.class);
             startActivity(showActivity);
