@@ -1056,7 +1056,7 @@ public class GraphActivity extends AppCompatActivity{
                     LinearLayout coordinatorLayout = (LinearLayout) findViewById(R.id
                             .linearLayout);
                     Snackbar snackbar = Snackbar
-                            .make(coordinatorLayout, "Dit getal is kleiner dan de vorige ingave. Geef de totale km stand in", Snackbar.LENGTH_LONG);
+                            .make(coordinatorLayout, "Dit getal is kleiner dan de vorige ingave. Geef de totale km stand in!", Snackbar.LENGTH_LONG);
 
                     View snackbarView = snackbar.getView();
                     snackbarView.setBackgroundColor(Color.DKGRAY);
