@@ -28,46 +28,50 @@
                 android:padding="5dp"
                 android:src="@drawable/trophynew2"/>
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/vertical_card_layout"
                 android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center">
 
-                <LinearLayout
-                    android:orientation="horizontal"
+
+                <TextView
+                    android:text="Groep T"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center">
-
-                    <TextView
-                        android:text="11.02"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:textSize="20dp"
-                        android:id="@+id/card_classname" />
-
-                    <TextView
-                        android:text="Groep T"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:textSize="20dp"
-                        android:id="@+id/card_schoolname" />
-
-                </LinearLayout>
+                    android:id="@+id/card_classname"
+                    android:textSize="20dp"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="10dp"
+                    android:textStyle="normal|bold" />
 
                 <TextView
                     android:text="5695 punten"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="5dp"
                     android:textSize="20dp"
-                    android:id="@+id/card_highscore" />
+                    android:id="@+id/card_highscore"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp" />
 
-            </LinearLayout>
+                <TextView
+                    android:text="11.02"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20dp"
+                    android:id="@+id/card_schoolname"
+                    android:paddingTop="10dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/card_classname"
+                    android:layout_toEndOf="@+id/card_classname"
+                    android:layout_marginLeft="10dp"
+                    android:textStyle="normal|bold" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 

@@ -45,7 +45,7 @@ public class RecyclerAdapter  extends RecyclerView.Adapter<RecyclerAdapter.ViewH
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.schoolname.setText(dataSet.get(position).getGroepsnaam());
         holder.classname.setText(dataSet.get(position).getClassname());
-        holder.highscore.setText(dataSet.get(position).getHighscore());
+        holder.highscore.setText("Resterende energie: " + dataSet.get(position).getHighscore() + " Watt per leerling");
         switch(position){
             case 0:
                 holder.schoolimage.setImageResource(R.drawable.goud);
