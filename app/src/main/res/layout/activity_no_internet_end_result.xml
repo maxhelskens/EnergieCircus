@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/textOnTop"
-        android:text="Je eindscore bedraagt"
+        android:text="Je resterende energie bedraagt"
         android:textSize="50dp"
         android:textStyle="bold"
         android:gravity="center|top"/>
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/textOnBottom"
-        android:text="Proficiat!"
+        android:text="per leerling. \n Proficiat!"
         android:textSize="50dp"
         android:textStyle="bold"
         android:gravity="center|bottom" />

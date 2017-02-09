@@ -1,10 +1,11 @@
 package com.example.max.energiecircus;
 
-        import android.content.Intent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.widget.TextView;
 
 import com.plattysoft.leonids.ParticleSystem;
@@ -13,7 +14,7 @@ import com.plattysoft.leonids.modifiers.ScaleModifier;
 public class NoInternetEndResult extends AppCompatActivity {
 
     private TextView endResultTxt;
-
+    private int lengthEndResult;
     @Override
     public void onBackPressed()
     {
@@ -31,9 +32,18 @@ public class NoInternetEndResult extends AppCompatActivity {
         //set view
         setContentView(R.layout.activity_no_internet_end_result);
 
+        String s= String.valueOf((int) endResult) + "W";
+        lengthEndResult = String.valueOf((int) endResult).length();
+        SpannableString ss1=  new SpannableString(s);
+        ss1.setSpan(new RelativeSizeSpan(10f), 0,lengthEndResult, 0); // set size
+        ss1.setSpan(new RelativeSizeSpan(6f), lengthEndResult, lengthEndResult+1,0);
         endResultTxt = (TextView) findViewById(R.id.myImageViewText);
-        endResultTxt.setText((String.valueOf((int) endResult)));
-        endResultTxt.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 150.f);
+        endResultTxt.setText(ss1);
+
+
+//        endResultTxt = (TextView) findViewById(R.id.myImageViewText);
+//        endResultTxt.setText((String.valueOf((int) endResult)));
+//        endResultTxt.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 150.f);
 
         //Sparkling stars
         ParticleSystem ps = new ParticleSystem(this, 20, R.drawable.star, 3000);//Deze star is de afbeelding die ik u direct zal sturen maar ge moogt daar ook een andere van maken ze
