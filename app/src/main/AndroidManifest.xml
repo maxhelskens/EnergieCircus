@@ -24,6 +24,7 @@
             android:name=".GraphActivity"
             android:screenOrientation="landscape" />
         <activity android:name=".EndResultActivity" />
+        <activity android:name=".ScoreActivity" />
         <activity
             android:name=".NoInternetEndResult"
             android:label="@string/title_activity_no_internet_end_result"

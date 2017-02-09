@@ -114,10 +114,23 @@
         android:layout_alignParentStart="true"
         android:background="@color/colorPrimaryDark"
         android:textColor="@color/textColorPrimary"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true" />
+        android:layout_toLeftOf="@+id/trophyIcon"
+        android:layout_toStartOf="@+id/trophyIcon"
+        android:paddingRight="10dp" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@color/colorPrimary"
+        android:id="@+id/trophyIcon"
+        android:src="@drawable/trophynew"
+        android:onClick="viewScore"
+        android:layout_below="@+id/editText_aantalPuntenKwis"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/registratie"
+        android:layout_marginLeft="10dp" />
 
 
-
-    </RelativeLayout>
+</RelativeLayout>

@@ -460,6 +460,10 @@ public class GraphActivity extends AppCompatActivity{
                 /*scanLeDevice(true);*/
 
                 return true;
+            case R.id.info:
+                steps.setVisibility(View.VISIBLE);
+
+                return true;
             default:
                 /*Obtain the discovered device to connect with*/
                 BluetoothDevice device = mDevices.get(item.getItemId());

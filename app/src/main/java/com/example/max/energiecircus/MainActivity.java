@@ -4,8 +4,13 @@ package com.example.max.energiecircus;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -120,6 +125,11 @@ public class MainActivity extends AppCompatActivity{
             startActivity(showActivity);
         }
 
+    }
+
+    public void viewScore(View view) {
+        Intent showActivity = new Intent(this, ScoreActivity.class);
+        startActivity(showActivity);
     }
 
 

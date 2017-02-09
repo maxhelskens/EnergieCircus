@@ -41,7 +41,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#C94f4f"
+            android:background="#DE2630"
             android:id="@+id/stopGame"
             android:text="Einde van de week"
             android:onClick="stopGame"
