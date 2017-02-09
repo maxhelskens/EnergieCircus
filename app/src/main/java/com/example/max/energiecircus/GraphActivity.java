@@ -884,7 +884,7 @@ public class GraphActivity extends AppCompatActivity{
 
         /**
          * Every 10 minutes, the data should be updated.
-         * energyLeft variable should be stored in dB
+         * energyLeft variable/lln should be stored in dB
          */
         if (i % 10 == 0) {
 
@@ -896,7 +896,7 @@ public class GraphActivity extends AppCompatActivity{
                 Log.e("naamresgistratie: " , naamRegistratie);
                 Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                 if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
-                    dbh.updateHighscore(naamRegistratie, String.valueOf(energyLeft));
+                    dbh.updateHighscore(naamRegistratie, String.valueOf(energyLeft/aantalLeerlingenRegistratie));
                 }
             }
 
@@ -1115,7 +1115,7 @@ public class GraphActivity extends AppCompatActivity{
 //                            Log.e("classrooms: " , dbh.getAllClassrooms().get(i).getGroepsnaam());
                             if(dbh.getAllClassrooms().get(i).getGroepsnaam().equals(naamRegistratie)){
 //                                Log.e("energy left : " , String.valueOf(energyLeft));
-                                dbh.updateHighscore(naamRegistratie, String.valueOf(energyLeft));
+                                dbh.updateHighscore(naamRegistratie, String.valueOf(energyLeft/aantalLeerlingenRegistratie));
 //                                Log.e("Highscore is: ", dbh.getAllClassrooms().get(i).getHighscore());
 //                                Log.e("Groepsnaam= ", classroom.getGroepsnaam());
                             }
