@@ -11,7 +11,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.content.SharedPreferences.Editor;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -22,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -69,8 +69,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import static java.lang.Math.pow;
@@ -174,7 +172,7 @@ public class GraphActivity extends AppCompatActivity{
     private NetworkInfo mWifi;
     private ConnectivityManager connManager;
     private double previousTotalInputDistance = 0.0;
-    private double minLuxValue = 90.0;
+    private double minLuxValue = 70.0;
     private double normalizedValuePerStudent;
 
     ImageView steps;
